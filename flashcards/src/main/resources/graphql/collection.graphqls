@@ -1,0 +1,23 @@
+extend type Query {
+    collection(id: ID!): Collection
+    collectionsByUserId(userId: ID!): [Collection]
+}
+
+extend type Mutation {
+    saveCollection(collection: CollectionInp!): Collection
+}
+
+input CollectionInp {
+    id: ID
+    name: String
+    user: UserInp
+    cards: [CardInp]
+}
+
+type Collection {
+    id: ID!
+    name: String!
+    user: User
+    cards: [Card]
+    countCards: Int
+}

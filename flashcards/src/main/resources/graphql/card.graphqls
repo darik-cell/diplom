@@ -1,0 +1,27 @@
+scalar LocalDateTime
+
+extend type Query {
+    card(id: ID!): Card
+    cardsByCollectionId(collectionId: ID!): [Card]
+}
+
+extend type Mutation {
+    saveCard(card: CardInp!): Card
+    deleteCard(card: CardInp!): Boolean
+    deleteCardsByCollectionId(collectionId: ID!): Int
+}
+
+input CardInp {
+    id: ID
+    text: String
+    collection: CollectionInp
+    createdAt: LocalDateTime
+}
+
+type Card {
+    id: ID!
+    text: String!
+    collection: Collection!
+    createdAt: LocalDateTime
+    reviewHistory: [ReviewHistory]
+}

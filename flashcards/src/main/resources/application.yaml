@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${POSTGRES_DATABASE}?currentSchema=${POSTGRES_SCHEMA}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+#    open-in-view: false
+  liquibase:
+    change-log: classpath:db.changelog-master.xml
+    default-schema: flashcards
+  config:
+    import: optional:file:.env[.properties]
+  graphql:
+    graphiql:
+      enabled: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expirationMs: 86400000

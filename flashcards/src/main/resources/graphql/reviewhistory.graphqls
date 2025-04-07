@@ -1,0 +1,10 @@
+type ReviewHistory {
+    id: ID!
+    card: Card
+    reviewDate: LocalDateTime
+    quality: Int
+    repetitionCount: Int
+    intervalDays: Int
+    easeFactor: Float
+    nextReview: LocalDateTime
+}
