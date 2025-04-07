@@ -47,38 +47,42 @@ const App = () => {
                     </Navbar.Collapse>
                 </Container>
             </Navbar>
-            <Container className="mt-4">
-                <Routes>
-                    <Route
-                        path="/login"
-                        element={
+            <Routes>
+                <Route
+                    path="/login"
+                    element={
+                        <Container className="mt-4">
                             <PublicRoute>
                                 <Login/>
                             </PublicRoute>
-                        }
-                    />
-                    <Route
-                        path="/register"
-                        element={
+                        </Container>
+                    }
+                />
+                <Route
+                    path="/register"
+                    element={
+                        <Container className="mt-4">
                             <PublicRoute>
                                 <Register/>
                             </PublicRoute>
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
+                        </Container>
+                    }
+                />
+                <Route
+                    path="/"
+                    element={
+                        <Container className="mt-4">
                             <PrivateRoute>
                                 <Main/>
                             </PrivateRoute>
-                        }
-                    />
-                    <Route
-                        path="/collection/:collectionId"
-                        element={<AddCards/>}
-                    />
-                </Routes>
-            </Container>
+                        </Container>
+                    }
+                />
+                <Route
+                    path="/collection/:collectionId"
+                    element={<AddCards/>}
+                />
+            </Routes>
         </>
     );
 };

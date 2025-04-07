@@ -5,22 +5,20 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 import { gql, useQuery } from '@apollo/client';
 
-// CodeMirror v6 (через @uiw/react-codemirror)
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { githubLight } from '@uiw/codemirror-theme-github';
 
-// markdown-it и плагины
-import MarkdownIt from 'markdown-it';
-import markdownItKatex from 'markdown-it-katex';
-import hljs from 'highlight.js';
+// Новый подход: react-markdown + rehype-katex
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeKatex from 'rehype-katex';
+import rehypeHighlight from 'rehype-highlight';
 
-// Стили GitHub Markdown, highlight.js и KaTeX
 import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import 'katex/dist/katex.min.css';
 
-// Запрос для получения коллекции
 const GET_COLLECTION = gql`
     query GetCollection($id: ID!) {
         collection(id: $id) {
@@ -29,24 +27,6 @@ const GET_COLLECTION = gql`
         }
     }
 `;
-
-// Настройка markdown-it: переносы, подсветка кода и KaTeX
-const mdParser = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    breaks: true, // одиночный перенос строки => <br/>
-    highlight: (str, lang) => {
-        if (lang && hljs.getLanguage(lang)) {
-            try {
-                return `<pre class="hljs"><code>` +
-                    hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
-                    `</code></pre>`;
-            } catch (__) {}
-        }
-        return `<pre class="hljs"><code>${mdParser.utils.escapeHtml(str)}</code></pre>`;
-    }
-}).use(markdownItKatex);
 
 const AddCards = () => {
     const { collectionId } = useParams();
@@ -63,14 +43,11 @@ const AddCards = () => {
         return <Container className="mt-4">Ошибка: {error.message}</Container>;
     }
 
-    const collectionName = data.collection.name;
-
     return (
-        <Container fluid className="mt-4" style={{ width: '100%' }}>
-            {/* Шапка с "React" слева и "Предпросмотр" справа в одной строке */}
-            <Row className="align-items-center">
+        <Container fluid className="mt-4 px-0">
+            <Row className="align-items-center mx-0">
                 <Col>
-                    <h2>React</h2>
+                    <h2>Редактор ({data.collection.name})</h2>
                 </Col>
                 <Col className="text-end">
                     <h2>Предпросмотр</h2>
@@ -78,40 +55,31 @@ const AddCards = () => {
             </Row>
             <hr />
 
-            {/* Основная область (редактор + просмотр) */}
-            <Row>
-                {/* Левая колонка: редактор */}
-                <Col
-                    md={6}
-                    style={{
-                        padding: 0,
-                        borderRight: '1px solid #ccc', // вертикальная линия-разделитель
-                        minHeight: '80vh',             // чтобы занять приличную высоту
-                    }}
-                >
-                    <CodeMirror
-                        value={cardText}
-                        height="80vh"       // Высота редактора
-                        width="100%"       // Ширина всей колонки
-                        theme={githubLight}
-                        extensions={[markdown()]}
-                        onChange={(value) => setCardText(value)}
-                    />
+            <Row className="mx-0" style={{ height: 'calc(100vh - 160px)' }}>
+                <Col md={6} className="px-0" style={{ borderRight: '1px solid #ccc' }}>
+                    <div style={{ height: '100%', overflowY: 'auto' }}>
+                        <CodeMirror
+                            value={cardText}
+                            theme={githubLight}
+                            extensions={[markdown()]}
+                            onChange={(value) => setCardText(value)}
+                        />
+                    </div>
                 </Col>
 
-                {/* Правая колонка: предпросмотр */}
-                <Col md={6} style={{ padding: '10px', minHeight: '80vh' }}>
-                    {/* Рендерим markdown */}
-                    <div
-                        className="markdown-body"
-                        style={{ width: '100%' }}
-                        dangerouslySetInnerHTML={{ __html: mdParser.render(cardText) }}
-                    />
+                <Col md={6} className="px-3" style={{ overflowY: 'auto' }}>
+                    <div className="markdown-body">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeKatex, rehypeHighlight]}
+                        >
+                            {cardText}
+                        </ReactMarkdown>
+                    </div>
                 </Col>
             </Row>
 
-            {/* Кнопка "Добавить карточку" */}
-            <div className="d-flex justify-content-end mt-3">
+            <div className="d-flex justify-content-end p-3" style={{ borderTop: '1px solid #ccc' }}>
                 <Button variant="primary" size="sm">
                     Добавить карточку
                 </Button>

@@ -11,3 +11,17 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.no-scrollbar {
+  overflow: auto;
+  scrollbar-width: none;        // Firefox
+-ms-overflow-style: none;     // IE, Edge
+}
+.no-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.katex-display {
+  display: block !important;
+  margin: 1em 0 !important;
+}
