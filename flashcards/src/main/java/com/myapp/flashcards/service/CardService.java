@@ -6,6 +6,7 @@ import com.myapp.flashcards.model.Card;
 import com.myapp.flashcards.repository.CardRepository;
 import com.myapp.flashcards.repository.CollectionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class CardService {
   }
 
   public Set<Card> getAllByCollectionId(Integer collectionId) {
-    return cardRepository.findAllByCollectionId(collectionId);
+    return cardRepository.findAllByCollectionId(collectionId, Sort.by("createdAt"));
   }
 
   public Integer countByCollectionId(Integer collectionId) {

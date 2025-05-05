@@ -1,15 +1,14 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import { gql, useQuery } from '@apollo/client';
+import { gql, useQuery, useMutation } from '@apollo/client';
 
 import CodeMirror from '@uiw/react-codemirror';
 import { markdown } from '@codemirror/lang-markdown';
 import { githubLight } from '@uiw/codemirror-theme-github';
 
-// Для Vim-режима
+// Replit/Codemirror Vim
 import { vim } from '@replit/codemirror-vim';
-import { keymap } from '@codemirror/view';
 import { StateField } from '@codemirror/state';
 import { lineNumbers } from '@codemirror/view';
 
@@ -19,22 +18,40 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
 
-// Иконки (установите react-icons или замените на любые другие)
 import { FaPencilAlt, FaEye } from 'react-icons/fa';
 
-// Стили для KaTeX, подсветки и базовой github-стилизации
+// Стили для KaTeX, подсветки, GitHub-стили
 import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github.css';
 import 'github-markdown-css/github-markdown.css';
 
+// Обработка ??...??
+import { processMarkedText } from '../utils/highlightLogic';
+
 const GET_COLLECTION = gql`
-  query GetCollection($id: ID!) {
-    collection(id: $id) {
-      id
-      name
+    query GetCollection($id: ID!) {
+        collection(id: $id) {
+            id
+            name
+        }
     }
-  }
+`;
+
+// Мутация для создания карточки
+const SAVE_CARD = gql`
+    mutation SaveCard($card: CardInp!) {
+        saveCard(card: $card) {
+            id
+            text
+            collection {
+                id
+                name
+            }
+            createdAt
+        }
+    }
 `;
 
 // Плагин для относительной нумерации строк
@@ -47,49 +64,13 @@ const relativeLineNumbers = lineNumbers({
     },
 });
 
-// "jj" -> Escape
-function jjKeymap() {
-    return keymap.of([
-        {
-            key: 'j',
-            run: (view) => {
-                const now = Date.now();
-                const state = view.state.field(vimState, false);
-                if (!state) return false;
-
-                const { lastKeyDownTime, lastKey } = state;
-                if (lastKey === 'j' && now - lastKeyDownTime < 300) {
-                    vim().commands.esc(view);
-                    return true;
-                }
-                return false;
-            },
-        },
-    ]);
-}
-
+// Просто пустой StateField, чтобы Vim инициализировался
 const vimState = StateField.define({
-    create: () => ({ lastKey: null, lastKeyDownTime: 0 }),
+    create: () => ({}),
     update(value, tr) {
-        if (tr.userEvent && tr.userEvent.startsWith('input.type')) {
-            const now = Date.now();
-            const ch = tr.newDoc.sliceString(tr.changes.from, tr.changes.to);
-            return { lastKey: ch, lastKeyDownTime: now };
-        }
         return value;
     },
 });
-
-// Собственный обработчик для "==...==" -> <mark>...<mark>
-function MarkdownHighlight({ children }) {
-    if (typeof children === 'string') {
-        // Заменяем ==...== на <mark>...<mark>
-        const replaced = children.replace(/==([^=]+)==/g, '<mark>$1</mark>');
-        return <span dangerouslySetInnerHTML={{ __html: replaced }} />;
-    }
-    // Если нода не строка, выводим как есть
-    return <>{children}</>;
-}
 
 const AddCards = () => {
     const { collectionId } = useParams();
@@ -99,16 +80,24 @@ const AddCards = () => {
 
     const [cardText, setCardText] = useState('');
     const [vimMode, setVimMode] = useState(false);
-    // Режим выделения (карандаш)
     const [annotationMode, setAnnotationMode] = useState(false);
+    const [clozeMode, setClozeMode] = useState(false);
 
-    // Базовые расширения CodeMirror
+    const hiddenContentsRef = useRef([]);
+
+    // Инициализация useMutation
+    const [saveCard, { loading: saving, error: saveError }] = useMutation(SAVE_CARD, {
+        // Если требуется обновлять список карточек коллекции после сохранения:
+        refetchQueries: [{ query: GET_COLLECTION, variables: { id: collectionId } }],
+        // Можно добавить update или onCompleted для дополнительных действий
+    });
+
+    // Базовые плагины CodeMirror
     const baseExtensions = useMemo(() => [markdown(), relativeLineNumbers], []);
 
-    // Если включён Vim-режим
+    // Собираем плагины с учётом vimMode
     const editorExtensions = useMemo(() => {
-        if (!vimMode) return baseExtensions;
-        return [...baseExtensions, vim(), vimState, jjKeymap()];
+        return vimMode ? [...baseExtensions, vimState, vim()] : baseExtensions;
     }, [vimMode, baseExtensions]);
 
     // При mouseUp в предпросмотре, если annotationMode=true, оборачиваем выделенный текст в "==...=="
@@ -121,7 +110,7 @@ const AddCards = () => {
         const selectedText = selection.toString();
         if (!selectedText) return;
 
-        // Простой вариант: ищем первое вхождение в cardText
+        // Ищем первое вхождение в cardText
         const idx = cardText.indexOf(selectedText);
         if (idx === -1) return;
 
@@ -134,10 +123,28 @@ const AddCards = () => {
             cardText.slice(idx + selectedText.length);
 
         setCardText(newText);
-
-        // Снимаем выделение
         selection.removeAllRanges();
     }, [annotationMode, cardText]);
+
+    // Обработка ??...??
+    hiddenContentsRef.current = [];
+    const processedText = processMarkedText(cardText, clozeMode, hiddenContentsRef.current);
+
+    // Обработчик клика для добавления карточки
+    const handleAddCard = async () => {
+        try {
+            const inputCard = {
+                text: cardText,
+                collection: { id: collectionId }
+            };
+
+            await saveCard({ variables: { card: inputCard } });
+            // Например, можно очистить редактор после сохранения
+            setCardText('');
+        } catch (error) {
+            console.error('Ошибка при сохранении карточки:', error);
+        }
+    };
 
     if (loading) {
         return <Container fluid>Загрузка...</Container>;
@@ -147,36 +154,29 @@ const AddCards = () => {
     }
 
     return (
-        <Container
-            fluid
-            className="m-0 p-0 d-flex flex-column"
-            style={{ minHeight: '100vh' }}
-        >
+        <Container fluid className="m-0 p-0 d-flex flex-column" style={{ minHeight: '100vh' }}>
             {/* Верхняя часть */}
             <Row className="mx-0" style={{ flexShrink: 0 }}>
                 <Col className="p-3">
                     <h2>Редактор ({data.collection.name})</h2>
                 </Col>
-
-                {/* Заголовок предпросмотра + кнопки (карандаш, глаз) справа */}
-                <Col
-                    className="p-3 d-flex justify-content-end align-items-center"
-                    style={{ flexShrink: 0 }}
-                >
+                <Col className="p-3 d-flex justify-content-end align-items-center" style={{ flexShrink: 0 }}>
                     <h2 className="mb-0 me-3">Предпросмотр</h2>
 
-                    {/* Кнопка с карандашом */}
                     <Button
                         variant={annotationMode ? 'secondary' : 'outline-secondary'}
                         size="sm"
                         className="me-2"
-                        onClick={() => setAnnotationMode((prev) => !prev)}
+                        onClick={() => setAnnotationMode(prev => !prev)}
                     >
                         <FaPencilAlt />
                     </Button>
 
-                    {/* Кнопка с глазом (пока без логики) */}
-                    <Button variant="outline-secondary" size="sm">
+                    <Button
+                        variant={clozeMode ? 'secondary' : 'outline-secondary'}
+                        size="sm"
+                        onClick={() => setClozeMode(prev => !prev)}
+                    >
                         <FaEye />
                     </Button>
                 </Col>
@@ -195,7 +195,7 @@ const AddCards = () => {
                         theme={githubLight}
                         extensions={editorExtensions}
                         height="100%"
-                        onChange={(value) => setCardText(value)}
+                        onChange={value => setCardText(value)}
                     />
                 </Col>
 
@@ -203,28 +203,22 @@ const AddCards = () => {
                     md={6}
                     className="p-3"
                     style={{ overflow: 'auto' }}
-                    // Отслеживаем mouseUp для выделения
                     onMouseUp={handlePreviewMouseUp}
                 >
                     <div className="markdown-body">
                         <ReactMarkdown
-                            // Подключаем плагины
                             remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeKatex, rehypeHighlight]}
-                            // Включаем "breaks" => одинарный перенос строки = <br />
+                            rehypePlugins={[rehypeKatex, rehypeHighlight, rehypeRaw]}
+                            skipHtml={false}
                             breaks={true}
-                            // Заменяем "==...==" на <mark>...<mark>
-                            components={{
-                                text: ({ children }) => <MarkdownHighlight>{children}</MarkdownHighlight>,
-                            }}
                         >
-                            {cardText}
+                            {processedText}
                         </ReactMarkdown>
                     </div>
                 </Col>
             </Row>
 
-            {/* Нижняя панель с кнопками */}
+            {/* Нижняя панель */}
             <Row className="mx-0" style={{ flexShrink: 0 }}>
                 <Col
                     xs={12}
@@ -234,12 +228,12 @@ const AddCards = () => {
                     <Button
                         variant={vimMode ? 'secondary' : 'outline-secondary'}
                         size="sm"
-                        onClick={() => setVimMode((prev) => !prev)}
+                        onClick={() => setVimMode(prev => !prev)}
                     >
                         {vimMode ? 'Отключить Vim' : 'Включить Vim'}
                     </Button>
 
-                    <Button variant="primary" size="sm">
+                    <Button variant="primary" size="sm" onClick={handleAddCard}>
                         Добавить карточку
                     </Button>
                 </Col>

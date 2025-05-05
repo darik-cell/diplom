@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
-import {Container, Button, Form, Spinner} from 'react-bootstrap';
+import {Container, Button, Form, Spinner, Table} from 'react-bootstrap';
 import {gql, useQuery, useMutation} from '@apollo/client';
 import {useNavigate} from 'react-router-dom';
 import {jwtDecode} from 'jwt-decode';
+import {Link} from 'react-router-dom';
 
 function getUserIdFromToken() {
     const token = localStorage.getItem('token');
@@ -21,6 +22,7 @@ const GET_COLLECTIONS = gql`
         collectionsByUserId(userId: $userId) {
             id
             name
+            countCards
         }
     }
 `;
@@ -34,9 +36,10 @@ const SAVE_COLLECTION = gql`
     }
 `;
 
+// Новая мутация для удаления коллекции
 const DELETE_COLLECTION = gql`
-    mutation DeleteCollection($collection: CollectionInp!) {
-        deleteCollection(collection: $collection)
+    mutation DeleteCollection($id: ID!) {
+        deleteCollection(id: $id)
     }
 `;
 
@@ -51,6 +54,7 @@ const Main = () => {
     const {loading, error, data, refetch} = useQuery(GET_COLLECTIONS, {
         variables: {userId},
         skip: !userId,
+        // Можно добавить fetchPolicy: 'cache-and-network' для актуализации данных
     });
 
     const [saveCollection] = useMutation(SAVE_COLLECTION, {
@@ -58,14 +62,17 @@ const Main = () => {
             setNewName('');
             setShowCreateButton(false);
             refetch();
-        }
+        },
     });
 
     const [deleteCollection] = useMutation(DELETE_COLLECTION, {
-        onCompleted: () => {
-            setCollectionToDelete(null);
-            refetch();
-        }
+        onCompleted: (data) => {
+            // Если mutation вернула true, можно обновить список либо полность через refetch
+            if (data.deleteCollection) {
+                setCollectionToDelete(null);
+                refetch();
+            }
+        },
     });
 
     const handleCreateCollection = () => {
@@ -86,9 +93,7 @@ const Main = () => {
 
     const handleConfirmDelete = (id) => {
         deleteCollection({
-            variables: {
-                collection: {id},
-            },
+            variables: {id},
         });
     };
 
@@ -105,43 +110,82 @@ const Main = () => {
         return <Container className="mt-4">Нет авторизации</Container>;
     }
 
-    if (loading) return <Container className="mt-4"><Spinner animation="border"/></Container>;
-    if (error) return <Container className="mt-4">Ошибка: {error.message}</Container>;
+    if (loading)
+        return (
+            <Container className="mt-4">
+                <Spinner animation="border"/>
+            </Container>
+        );
+    if (error)
+        return <Container className="mt-4">Ошибка: {error.message}</Container>;
 
     return (
-        <Container className="mt-4" style={{maxWidth: "66%"}}>
+        <Container className="mt-4" style={{maxWidth: '66%'}}>
             <h2>Список коллекций пользователя</h2>
 
-            {data.collectionsByUserId.map((col) => (
-                <div key={col.id} style={{display: 'flex', alignItems: 'center', marginBottom: '5px'}}>
-                    <span style={{flex: 1}}>{col.name}</span>
-                    <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => handleAddCards(col.id)}
-                        style={{marginRight: '5px'}}
-                    >
-                        +
-                    </Button>
-                    {collectionToDelete !== col.id ? (
-                        <span
-                            style={{cursor: 'pointer', color: 'gray'}}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = 'red')}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = 'gray')}
-                            onClick={() => handleShowDelete(col.id)}
-                        >
-              🗑
-            </span>
-                    ) : (
-                        <span>
-              Удалить?{' '}
-                            <Button variant="outline-success" size="sm"
-                                    onClick={() => handleConfirmDelete(col.id)}>✓</Button>{' '}
-                            <Button variant="outline-danger" size="sm" onClick={handleCancelDelete}>×</Button>
-            </span>
-                    )}
-                </div>
-            ))}
+            <div className="p-3 mb-4 bg-white rounded shadow">
+                <Table bordered hover responsive className="mb-0">
+                    <thead>
+                    <tr>
+                        <th style={{width: '40%'}}>Коллекция</th>
+                        <th>Всего карточек</th>
+                        <th>Новые карточки</th>
+                        <th>К просмотру</th>
+                        <th>Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {data.collectionsByUserId.map((col) => (
+                        <tr key={col.id}>
+                            <td>
+                                <Link to={`/repeat/${col.id}`}>{col.name}</Link>
+                            </td>
+                            <td>{col.countCards}</td>
+                            <td>
+                                <span className="text-primary">0</span>
+                            </td>
+                            <td>
+                                <span className="text-success">0</span>
+                            </td>
+                            <td>
+                                <Button
+                                    variant="outline-primary"
+                                    size="sm"
+                                    onClick={() => handleAddCards(col.id)}
+                                    style={{marginRight: '5px'}}
+                                >
+                                    +
+                                </Button>
+                                {collectionToDelete !== col.id ? (
+                                    <span
+                                        style={{cursor: 'pointer', color: 'gray'}}
+                                        onMouseEnter={(e) => (e.currentTarget.style.color = 'red')}
+                                        onMouseLeave={(e) => (e.currentTarget.style.color = 'gray')}
+                                        onClick={() => handleShowDelete(col.id)}
+                                    >
+                      🗑
+                    </span>
+                                ) : (
+                                    <span>
+                      Удалить?{' '}
+                                        <Button
+                                            variant="outline-success"
+                                            size="sm"
+                                            onClick={() => handleConfirmDelete(col.id)}
+                                        >
+                        ✓
+                      </Button>{' '}
+                                        <Button variant="outline-danger" size="sm" onClick={handleCancelDelete}>
+                        ×
+                      </Button>
+                    </span>
+                                )}
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </Table>
+            </div>
 
             <div style={{marginTop: '20px', position: 'relative', width: '300px'}}>
                 <Form.Control
@@ -150,11 +194,7 @@ const Main = () => {
                     value={newName}
                     onChange={(e) => {
                         setNewName(e.target.value);
-                        if (!e.target.value.trim()) {
-                            setShowCreateButton(false);
-                        } else {
-                            setShowCreateButton(true);
-                        }
+                        setShowCreateButton(e.target.value.trim() !== '');
                     }}
                 />
                 {showCreateButton && newName.trim() && (

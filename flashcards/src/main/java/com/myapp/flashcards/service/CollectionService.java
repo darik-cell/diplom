@@ -42,4 +42,9 @@ public class CollectionService {
     return collectionRepository.findById(collectionId);
   }
 
+  public Boolean deleteCollectionById(Integer collectionId) {
+    collectionRepository.deleteById(collectionId);
+    return !collectionRepository.existsById(collectionId);
+  }
+
 }

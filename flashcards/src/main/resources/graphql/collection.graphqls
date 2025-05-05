@@ -5,6 +5,7 @@ extend type Query {
 
 extend type Mutation {
     saveCollection(collection: CollectionInp!): Collection
+    deleteCollection(id: ID!): Boolean
 }
 
 input CollectionInp {

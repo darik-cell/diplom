@@ -33,7 +33,7 @@ public class Card {
   @EqualsAndHashCode.Include
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "card", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "card")
   private Set<ReviewHistory> reviewHistory;
 
   public void setCollection(Collection collection) {

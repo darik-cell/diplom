@@ -5,6 +5,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Main from './components/Main';
 import AddCards from './components/AddCards';
+import RepeatCards from './components/RepeatCards';
+import EditPage from "./components/EditPage";
 
 // Обёртка для приватных маршрутов (требуется токен)
 const PrivateRoute = ({children}) => {
@@ -37,6 +39,7 @@ const App = () => {
                         {token ? (
                             <Nav className="ms-auto">
                                 <Nav.Link onClick={handleLogout}>Выйти</Nav.Link>
+                                <Nav.Link as={Link} to="/edit">Редактировать</Nav.Link>
                             </Nav>
                         ) : (
                             <Nav className="ms-auto">
@@ -82,7 +85,24 @@ const App = () => {
                     path="/collection/:collectionId"
                     element={<AddCards/>}
                 />
+                <Route
+                    path="/edit"
+                    element={
+                        <PrivateRoute>
+                            <EditPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/repeat/:collectionId"
+                    element={
+                        <PrivateRoute>
+                            <RepeatCards/>
+                        </PrivateRoute>
+                    }
+                />
             </Routes>
+
         </>
     );
 };

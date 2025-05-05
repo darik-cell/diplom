@@ -32,6 +32,11 @@ public class CollectionController {
     return saved;
   }
 
+  @MutationMapping
+  public Boolean deleteCollection(@Argument("id") Integer id) {
+    return collectionService.deleteCollectionById(id);
+  }
+
   @QueryMapping
   public Collection collection(@Argument Integer id) {
     return collectionService.getCollectionById(id)

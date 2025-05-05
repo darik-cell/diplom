@@ -27,7 +27,7 @@ public class Collection {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @OneToMany(mappedBy = "collection", fetch = FetchType.LAZY, orphanRemoval = true)
+  @OneToMany(mappedBy = "collection", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, orphanRemoval = true)
   private Set<Card> cards = new HashSet<>();
 
   public void setCards(Set<Card> cards) {
