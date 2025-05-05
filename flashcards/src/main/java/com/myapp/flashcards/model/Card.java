@@ -5,11 +5,14 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
 @Table(name = "cards")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -33,11 +36,38 @@ public class Card {
   @EqualsAndHashCode.Include
   private LocalDateTime createdAt;
 
-  @OneToMany(mappedBy = "card")
-  private Set<ReviewHistory> reviewHistory;
+  // --- SRS-поля ---
+  @Column(nullable = false)
+  private Integer type;
+
+  @Column(nullable = false)
+  private Integer queue;
+
+  @Column(nullable = false)
+  private Integer due;
+
+  @Column(nullable = false)
+  private Integer ivl;
+
+  @Column(nullable = false)
+  private Integer factor;
+
+  @Column(nullable = false)
+  private Integer reps;
+
+  @Column(nullable = false)
+  private Integer lapses;
+
+  @Column(name = "steps_left", nullable = false)
+  private Integer stepsLeft;
+
+  @Transient
+  private Map<ReviewAnswer, Integer> newIntervals = new EnumMap<>(ReviewAnswer.class);
 
   public void setCollection(Collection collection) {
     this.collection = collection;
-    if (collection != null && collection.getCards() != null) collection.getCards().add(this);
+    if (collection != null && collection.getCards() != null) {
+      collection.getCards().add(this);
+    }
   }
 }

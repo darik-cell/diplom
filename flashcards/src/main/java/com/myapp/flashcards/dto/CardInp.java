@@ -15,6 +15,5 @@ import java.time.LocalDateTime;
 public class CardInp {
   private Integer id;
   private String text;
-  private CollectionInp collection;
-  private LocalDateTime createdAt;
+  private Integer collectionId;
 }

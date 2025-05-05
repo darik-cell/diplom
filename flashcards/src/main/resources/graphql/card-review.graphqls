@@ -1,0 +1,19 @@
+extend type Query {
+    startLearning(collectionId: ID!): [Card!]!
+}
+
+extend type Mutation {
+    reviewCard(cardId: ID!, answer: ReviewAnswer!): Card!
+}
+
+enum ReviewAnswer {
+    AGAIN
+    HARD
+    GOOD
+    EASY
+}
+
+type NextInterval {
+    answer: ReviewAnswer!
+    interval: Int!   # в днях
+}

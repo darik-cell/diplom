@@ -1,0 +1,124 @@
+@startuml
+' --- Цвета для каждого стейта по стереотипу ---
+skinparam state<<New>> BackgroundColor LightBlue
+skinparam state<<Learning>> BackgroundColor LightYellow
+skinparam state<<Review>> BackgroundColor LightGreen
+skinparam state<<Relearning>> BackgroundColor LightSalmon
+
+' --- Стартовый псевдостейт ---
+[*] --> New
+
+' --- Состояние New (новая карта) ---
+state New <<New>>
+New : Learning Steps: 1m, 10m, 1d…
+
+' --- Переход в обучение ---
+New --> Learning : показать карту\n(ответ)
+
+' --- Состояние Learning (фаза обучения) ---
+state Learning <<Learning>>
+Learning : шаги обучения из конфига\n(e.g. 1m → 10m → 1d)
+
+' --- Переходы внутри Learning ---
+Learning --> Learning : Again\n(если тот же шаг)
+Learning --> Learning : Good\n(следующий шаг)
+Learning --> Review   : Good\n(последний шаг)
+Learning --> Review   : Easy
+
+' --- Состояние Review (повторение) ---
+state Review <<Review>>
+Review : review по SRS\n(ivl×factor, hardFactor, easyBonus)
+
+' --- Переходы внутри Review ---
+Review --> Review    : Hard\n(ivl×hardFactor)
+Review --> Review    : Good\n(ivl×factor)
+Review --> Review    : Easy\n(ivl×factor×easyBonus)
+Review --> Relearning: Again\n(lapse → relearning)
+
+' --- Состояние Relearning (переобучение) ---
+state Relearning <<Relearning>>
+Relearning : шаги relearning\nиз конфига + minInterval
+
+' --- Завершение переобучения ---
+Relearning --> Review : по завершении всех шагов
+
+@enduml
+
+
+
+@startuml
+' Горизонтальная ориентация диаграммы
+left to right direction
+
+' Настройка цветов для стереотипов состояний
+skinparam state<<New>> BackgroundColor LightBlue
+skinparam state<<Learning>> BackgroundColor LightYellow
+skinparam state<<Review>> BackgroundColor LightGreen
+skinparam state<<Relearning>> BackgroundColor LightSalmon
+
+' Псевдостейт «старт»
+[*] --> New
+
+state New <<New>>
+New : Learning Steps: 1m, 10m, 1d…
+' Состояние New (новая карта)
+
+' Переход в первую фазу обучения
+New --> Learning : показать карту\n(ответ)
+
+' Состояние Learning (фаза обучения)
+
+state Learning <<Learning>>
+Learning : шаги обучения из конфига\n(e.g. 1m → 10m → 1d)
+' Внутренние переходы Learning
+Learning --> Learning : Again\n(тот же шаг)
+Learning --> Learning : Good\n(следующий шаг)
+Learning --> Review   : Good\n(последний шаг)
+Learning --> Review   : Easy
+
+' Состояние Review (повторение)
+state Review <<Review>>
+Review : review по SRS\n(ivl×factor, hardFactor, easyBonus)
+
+' Переходы Review
+Review --> Review     : Hard\n(ivl × hardFactor)
+Review --> Review     : Good\n(ivl × factor)
+Review --> Review     : Easy\n(ivl × factor × easyBonus)
+Review --> Relearning : Again\n(lapse → relearning)
+
+' Состояние Relearning (переобучение)
+state Relearning <<Relearning>>
+Relearning : шаги relearning\nиз конфига + minInterval
+
+' Возврат в Review после переобучения
+Relearning --> Review : по завершении шагов
+
+@enduml
+
+
+@startuml
+|User|
+start
+
+:Получить prevIvl из cards.ivl;
+:Вычислить delay = daysLate(card);
+
+if (ответ = Again?) then (да)
+  :Перевести карточку в Relearning;
+  stop
+else (нет)
+  if (ответ = Hard?) then (да)
+    :newIvl = prevIvl * hardInterval * intervalModifier;
+  else (нет)
+    if (ответ = Good?) then (да)
+      :newIvl = (prevIvl + delay/2) * ease * intervalModifier;
+    else
+      :newIvl = (prevIvl + delay) * ease * easyBonus * intervalModifier;
+    endif
+  endif
+endif
+
+:Ограничить newIvl (≥1, ≤maxInterval);
+:Сохранить newIvl в cards.ivl;
+stop
+@enduml

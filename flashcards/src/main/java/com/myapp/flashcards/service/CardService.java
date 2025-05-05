@@ -3,6 +3,7 @@ package com.myapp.flashcards.service;
 import com.myapp.flashcards.dto.CardInp;
 import com.myapp.flashcards.mapper.CardMapper;
 import com.myapp.flashcards.model.Card;
+import com.myapp.flashcards.model.Collection;
 import com.myapp.flashcards.repository.CardRepository;
 import com.myapp.flashcards.repository.CollectionRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,32 @@ public class CardService {
   private final CardMapper cardMapper;
 
   public Card saveCard(CardInp cardInp) {
-    Card newCard = cardMapper.toEntity(cardInp);
-    if (newCard.getId() != null) {
-      Card existedCard = cardRepository.findById(newCard.getId())
+    Card card = cardMapper.toEntity(cardInp);
+    if (card.getId() != null) {
+      // обновление текстового поля, как было
+      Card exist = cardRepository.findById(card.getId())
               .orElseThrow(() -> new RuntimeException("Card not found"));
-      if (!existedCard.getText().equals(newCard.getText())) existedCard.setText(newCard.getText());
-      return cardRepository.save(existedCard);
+      if (!exist.getText().equals(card.getText())) {
+        exist.setText(card.getText());
+      }
+      return cardRepository.save(exist);
     }
-    newCard.setCollection(collectionRepository.findById(newCard.getCollection().getId())
-            .orElseThrow(() -> new RuntimeException("Collection not found")));
-    return cardRepository.save(newCard);
+    // создание новой карты
+    Collection coll = collectionRepository.findById(cardInp.getCollectionId())
+            .orElseThrow(() -> new RuntimeException("Collection not found"));
+    card.setCollection(coll);
+
+    // инициализация SRS-параметров по умолчанию (как в Anki)
+    card.setType(0);
+    card.setQueue(0);
+    card.setDue(0);
+    card.setIvl(0);
+    card.setFactor(2500);
+    card.setReps(0);
+    card.setLapses(0);
+    card.setStepsLeft(2);  // количество learning-шагов по умолчанию
+
+    return cardRepository.save(card);
   }
 
   public Optional<Card> getCardById(int id) {
