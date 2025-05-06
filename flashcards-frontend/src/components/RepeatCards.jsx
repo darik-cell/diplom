@@ -1,9 +1,8 @@
-// src/components/RepeatCards.jsx
-import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import CardCounter from './CardCounter';
-import {Container, Button, Spinner, Row, Col} from 'react-bootstrap';
-import {gql, useQuery, useMutation} from '@apollo/client';
-import {useParams, Link} from 'react-router-dom';
+import { Container, Button, Spinner, Row, Col } from 'react-bootstrap';
+import { gql, useQuery, useMutation } from '@apollo/client';
+import { useParams, Link } from 'react-router-dom';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -16,60 +15,57 @@ import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github.css';
 import 'github-markdown-css/github-markdown.css';
 
-import {processMarkedText} from '../utils/highlightLogic';   // ваша функция ??...??
+import { processMarkedText } from '../utils/highlightLogic';
 
 /* ---------- GraphQL ---------- */
 
-// Карточки, готовые к показу
 const START_LEARNING = gql`
     query StartLearning($collectionId: ID!) {
         startLearning(collectionId: $collectionId) {
             id
             text
             queue
+            stepsLeft
             createdAt
             newIntervals {
                 answer
                 interval
+                unit
             }
         }
     }
 `;
 
-// Оценка карточки
 const REVIEW_CARD = gql`
     mutation ReviewCard($cardId: ID!, $answer: ReviewAnswer!) {
         reviewCard(cardId: $cardId, answer: $answer) {
             id
             queue
-            newIntervals { answer interval }
+            newIntervals { answer interval unit }
         }
     }
 `;
 
-/* ---------- Компонент ---------- */
+/* ---------- Component ---------- */
 
 const RepeatCards = () => {
-    const {collectionId} = useParams();
+    const { collectionId } = useParams();
 
-    /* --- Запрашиваем список due‑карточек --- */
-    const {loading, error, data, refetch} = useQuery(START_LEARNING, {
-        variables: {collectionId},
+    /* --- Запрашиваем список карточек --- */
+    const { loading, error, data, refetch } = useQuery(START_LEARNING, {
+        variables: { collectionId },
         fetchPolicy: 'network-only',
     });
 
-    /* --- Сохраняем индекс текущей карточки --- */
+    /* --- Индекс текущей карточки --- */
     const [idx, setIdx] = useState(0);
 
-    /* --- Mutation для оценки --- */
+    /* --- Мутация Review --- */
     const [reviewCard] = useMutation(REVIEW_CARD, {
-        onCompleted: () => {
-            /* После ответа подтягиваем свежий список */
-            refetch().then(() => setIdx(0));
-        }
+        onCompleted: () => refetch().then(() => setIdx(0))
     });
 
-    /* --- Отсортированный список: новые → старые --- */
+    /* --- Сортировка карточек --- */
     const cards = useMemo(() => {
         if (!data?.startLearning) return [];
         return [...data.startLearning].sort((a, b) => {
@@ -79,71 +75,82 @@ const RepeatCards = () => {
         });
     }, [data]);
 
-    /* --- Если всё пройдено --- */
     const finished = !loading && cards.length === 0;
+
+    /* --- Счётчик оставшихся --- */
     const remaining = useMemo(() => ({
         new: cards.filter(c => c.queue === 0).length,
         learning: cards.filter(c => c.queue === 1 || c.queue === 3).length,
         review: cards.filter(c => c.queue === 2).length,
     }), [cards]);
 
-    /* ---------- Cloze‑логика (??...??) ---------- */
-    const [displayText, setDisplayText] = useState('');
-    const [hidden, setHidden] = useState([]);  // оригиналы
-    const [revealIdx, setRevealIdx] = useState(0);   // сколько уже раскрыто
+    /* ---- Интервалы для кнопок ---- */
+    const intervals = useMemo(() => {
+        const cur = cards[idx];
+        if (!cur) return {};
+        const map = {};
+        cur.newIntervals.forEach(({ answer, interval, unit }) => {
+            let label;
+            if (unit === 'MIN') {
+                label = interval === 0 ? '<1\u202Fмин' : `<${interval}\u202Fмин`;
+            } else {
+                label = `${interval}\u202Fдн`;
+            }
+            map[answer] = label;
+        });
+        return map;
+    }, [cards, idx]);
 
-    /* Пересчёт текста при смене карточки */
+    /* ---------- Cloze‑логика ---------- */
+    const [displayText, setDisplayText] = useState('');
+    const [hidden, setHidden] = useState([]);
+    const [revealIdx, setRevealIdx] = useState(0);
+
     useEffect(() => {
         if (cards[idx]) {
             const buf = [];
-            const processed = processMarkedText(cards[idx].text, true, buf); // 'true' → заполняем [...] вместо текста
+            const processed = processMarkedText(cards[idx].text, true, buf);
             setDisplayText(processed);
             setHidden(buf);
             setRevealIdx(0);
         }
     }, [cards, idx]);
 
-    /* Tab → раскрываем следующий [...] */
-    const handleTab = (e) => {
+    const handleTab = useCallback((e) => {
         if (e.key !== 'Tab') return;
         e.preventDefault();
         if (revealIdx >= hidden.length) return;
-        setDisplayText((prev) => prev.replace('[...]', hidden[revealIdx]));
-        setRevealIdx((i) => i + 1);
-    };
+        setDisplayText(prev => prev.replace('[...]', hidden[revealIdx]));
+        setRevealIdx(i => i + 1);
+    }, [revealIdx, hidden]);
 
-    /* ---------- Оценка карточки ---------- */
+    /* ---------- Оценка ---------- */
     const answer = (ans) => {
-        reviewCard({variables: {cardId: cards[idx].id, answer: ans}});
+        reviewCard({ variables: { cardId: cards[idx].id, answer: ans } });
     };
 
     /* ---------- UI ---------- */
 
-    if (loading) return <Container className="mt-4"><Spinner/></Container>;
+    if (loading) return <Container className="mt-4"><Spinner /></Container>;
     if (error) return <Container className="mt-4">Ошибка: {error.message}</Container>;
     if (finished) return (
-        <Container className="mt-4" style={{textAlign: 'center'}}>
-            <h2>Все карточки на сегодня пройдены 🎉</h2>
+        <Container className="mt-4 text-center">
+            <h2>Все карточки на сегодня пройдены 🎉</h2>
             <Link to="/">На главную</Link>
         </Container>
     );
 
     const current = cards[idx];
 
-    const fmt = (n, u) => (u === 'MIN' ? `${n} мин` : `${n} дн`);
-
-    const intervals = Object.fromEntries(
-        current.newIntervals.map(i => [i.answer, fmt(i.interval, i.unit)])
-    );
-
     return (
         <Container fluid className="d-flex flex-column flex-grow-1 p-0">
             <Row className="justify-content-center flex-grow-1 m-0">
                 <Col md={8} className="d-flex flex-column p-0">
+
                     {/* --- Текст карточки --- */}
                     <div
                         className="markdown-body border p-3 mb-3 flex-grow-1"
-                        style={{overflow: 'auto'}}        /* прокрутка если текст длинный */
+                        style={{ overflow: 'auto' }}
                         tabIndex={0}
                         onKeyDown={handleTab}
                     >
@@ -157,14 +164,10 @@ const RepeatCards = () => {
 
                     {/* --- Кнопки оценки --- */}
                     <div className="d-flex justify-content-between mt-auto mb-2 px-3">
-
-                        {['AGAIN', 'HARD', 'GOOD', 'EASY'].map((k) => (
+                        {['AGAIN', 'HARD', 'GOOD', 'EASY'].map(k => (
                             <div key={k} className="text-center flex-fill mx-1">
-                                <small className="text-muted">
-                                    {intervals[k].interval}&nbsp;
-                                    {intervals[k].unit === 'MIN' ? 'мин' : 'дн'}
-                                </small>
-                                <br/>
+                                <small className="text-muted">{intervals[k] || ''}</small>
+                                <br />
                                 <Button
                                     variant={
                                         k === 'AGAIN' ? 'danger' :
@@ -172,18 +175,15 @@ const RepeatCards = () => {
                                                 k === 'GOOD' ? 'success' : 'primary'}
                                     size="sm"
                                     onClick={() => answer(k)}
-                                    style={{width: '100%'}}
+                                    style={{ width: '100%' }}
                                 >
                                     {k}
                                 </Button>
                             </div>
                         ))}
-
                     </div>
 
-                    <CardCounter total={remaining}/>
-
-                    {/* --- Доп.кнопка «Пропустить» (по желанию) --- */}
+                    <CardCounter total={remaining} />
 
                     <div className="text-center mb-3">
                         <Button variant="outline-secondary" size="sm"
@@ -191,7 +191,6 @@ const RepeatCards = () => {
                             Пропустить
                         </Button>
                     </div>
-
                 </Col>
             </Row>
         </Container>

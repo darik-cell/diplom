@@ -1,4 +1,4 @@
-### java\com\myapp\flashcards\config\GraphQLConfig.java
+### main\java\com\myapp\flashcards\config\GraphQLConfig.java
 ```java
 package com.myapp.flashcards.config;
 
@@ -35,7 +35,7 @@ public class GraphQLConfig {
 }
 ```
 
-### java\com\myapp\flashcards\config\SecurityConfig.java
+### main\java\com\myapp\flashcards\config\SecurityConfig.java
 ```java
 package com.myapp.flashcards.config;
 
@@ -114,7 +114,7 @@ public class SecurityConfig {
 }
 ```
 
-### java\com\myapp\flashcards\controller\AuthController.java
+### main\java\com\myapp\flashcards\controller\AuthController.java
 ```java
 package com.myapp.flashcards.controller;
 
@@ -166,7 +166,7 @@ public class AuthController {
 }
 ```
 
-### java\com\myapp\flashcards\controller\CardController.java
+### main\java\com\myapp\flashcards\controller\CardController.java
 ```java
 package com.myapp.flashcards.controller;
 
@@ -205,15 +205,53 @@ public class CardController {
 }
 ```
 
-### java\com\myapp\flashcards\controller\CardReviewController.java
+### main\java\com\myapp\flashcards\controller\CardReviewController.java
 ```java
 package com.myapp.flashcards.controller;
 
+import com.myapp.flashcards.dto.NextInterval;
+import com.myapp.flashcards.model.Card;
+import com.myapp.flashcards.model.ReviewAnswer;
+import com.myapp.flashcards.service.CardReviewService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.stereotype.Controller;
+
+import java.util.List;
+
+@Controller
+@RequiredArgsConstructor
 public class CardReviewController {
+
+  private final CardReviewService reviewService;
+
+  @QueryMapping
+  public List<Card> startLearning(@Argument Integer collectionId) {
+    return reviewService.startLearning(collectionId);
+  }
+
+  @MutationMapping
+  public Card reviewCard(@Argument Integer cardId,
+                         @Argument ReviewAnswer answer) {
+    return reviewService.gradeCard(cardId, answer);
+  }
+
+  /**
+   * Маппинг GraphQL поля Card.newIntervals → DTO NextInterval
+   */
+  @SchemaMapping(typeName = "Card", field = "newIntervals")
+  public List<NextInterval> newIntervals(Card c) {
+    return c.getNewIntervals().values().stream()
+            .map(dto -> new NextInterval(dto.answer(), dto.interval(), dto.unit()))
+            .toList();
+  }
 }
 ```
 
-### java\com\myapp\flashcards\controller\CollectionController.java
+### main\java\com\myapp\flashcards\controller\CollectionController.java
 ```java
 package com.myapp.flashcards.controller;
 
@@ -269,10 +307,25 @@ public class CollectionController {
   public Integer countCards(Collection collection) {
     return cardService.countByCollectionId(collection.getId());
   }
+
+  @SchemaMapping(typeName = "Collection", field = "newCount")
+  public Integer newCount(Collection collection) {
+    return cardService.countNew(collection.getId());
+  }
+
+  @SchemaMapping(typeName = "Collection", field = "learningCount")
+  public Integer learningCount(Collection collection) {
+    return cardService.countLearning(collection.getId());
+  }
+
+  @SchemaMapping(typeName = "Collection", field = "reviewCount")
+  public Integer reviewCount(Collection collection) {
+    return cardService.countDueReview(collection.getId());
+  }
 }
 ```
 
-### java\com\myapp\flashcards\controller\UserController.java
+### main\java\com\myapp\flashcards\controller\UserController.java
 ```java
 package com.myapp.flashcards.controller;
 
@@ -304,7 +357,7 @@ public class UserController {
 }
 ```
 
-### java\com\myapp\flashcards\dto\AuthRequest.java
+### main\java\com\myapp\flashcards\dto\AuthRequest.java
 ```java
 package com.myapp.flashcards.dto;
 
@@ -317,7 +370,7 @@ public class AuthRequest {
 }
 ```
 
-### java\com\myapp\flashcards\dto\AuthResponse.java
+### main\java\com\myapp\flashcards\dto\AuthResponse.java
 ```java
 package com.myapp.flashcards.dto;
 
@@ -331,7 +384,7 @@ public class AuthResponse {
 }
 ```
 
-### java\com\myapp\flashcards\dto\CardInp.java
+### main\java\com\myapp\flashcards\dto\CardInp.java
 ```java
 package com.myapp.flashcards.dto;
 
@@ -354,7 +407,7 @@ public class CardInp {
 }
 ```
 
-### java\com\myapp\flashcards\dto\CollectionInp.java
+### main\java\com\myapp\flashcards\dto\CollectionInp.java
 ```java
 package com.myapp.flashcards.dto;
 
@@ -376,7 +429,35 @@ public class CollectionInp {
 }
 ```
 
-### java\com\myapp\flashcards\dto\RegisterRequest.java
+### main\java\com\myapp\flashcards\dto\NextInterval.java
+```java
+package com.myapp.flashcards.dto;
+
+import com.myapp.flashcards.model.IntervalUnit;
+import com.myapp.flashcards.model.ReviewAnswer;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class NextInterval {
+  private ReviewAnswer answer;
+  private Integer interval;
+  private IntervalUnit unit;
+}
+```
+
+### main\java\com\myapp\flashcards\dto\NextIntervalDto.java
+```java
+package com.myapp.flashcards.dto;
+
+import com.myapp.flashcards.model.IntervalUnit;
+import com.myapp.flashcards.model.ReviewAnswer;
+
+public record NextIntervalDto(ReviewAnswer answer, int interval, IntervalUnit unit) {}
+```
+
+### main\java\com\myapp\flashcards\dto\RegisterRequest.java
 ```java
 package com.myapp.flashcards.dto;
 
@@ -393,7 +474,7 @@ public class RegisterRequest {
 }
 ```
 
-### java\com\myapp\flashcards\dto\UserInp.java
+### main\java\com\myapp\flashcards\dto\UserInp.java
 ```java
 package com.myapp.flashcards.dto;
 
@@ -414,7 +495,7 @@ public class UserInp {
 }
 ```
 
-### java\com\myapp\flashcards\FlashcardsApplication.java
+### main\java\com\myapp\flashcards\FlashcardsApplication.java
 ```java
 package com.myapp.flashcards;
 
@@ -431,7 +512,7 @@ public class FlashcardsApplication {
 }
 ```
 
-### java\com\myapp\flashcards\graphql\scalars\CustomLocalDateTimeCoercing.java
+### main\java\com\myapp\flashcards\graphql\scalars\CustomLocalDateTimeCoercing.java
 ```java
 package com.myapp.flashcards.graphql.scalars;
 
@@ -499,7 +580,7 @@ public class CustomLocalDateTimeCoercing implements Coercing<LocalDateTime, Stri
 }
 ```
 
-### java\com\myapp\flashcards\mapper\CardMapper.java
+### main\java\com\myapp\flashcards\mapper\CardMapper.java
 ```java
 package com.myapp.flashcards.mapper;
 
@@ -520,7 +601,7 @@ public interface CardMapper {
 }
 ```
 
-### java\com\myapp\flashcards\mapper\CollectionMapper.java
+### main\java\com\myapp\flashcards\mapper\CollectionMapper.java
 ```java
 package com.myapp.flashcards.mapper;
 
@@ -541,7 +622,7 @@ public interface CollectionMapper {
 }
 ```
 
-### java\com\myapp\flashcards\mapper\UserMapper.java
+### main\java\com\myapp\flashcards\mapper\UserMapper.java
 ```java
 package com.myapp.flashcards.mapper;
 
@@ -564,20 +645,24 @@ public interface UserMapper {
 }
 ```
 
-### java\com\myapp\flashcards\model\Card.java
+### main\java\com\myapp\flashcards\model\Card.java
 ```java
 package com.myapp.flashcards.model;
 
+import com.myapp.flashcards.dto.NextIntervalDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
 @Table(name = "cards")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -626,6 +711,9 @@ public class Card {
   @Column(name = "steps_left", nullable = false)
   private Integer stepsLeft;
 
+  @Transient
+  private Map<ReviewAnswer, NextIntervalDto> newIntervals = new EnumMap<>(ReviewAnswer.class);
+
   public void setCollection(Collection collection) {
     this.collection = collection;
     if (collection != null && collection.getCards() != null) {
@@ -635,7 +723,7 @@ public class Card {
 }
 ```
 
-### java\com\myapp\flashcards\model\Collection.java
+### main\java\com\myapp\flashcards\model\Collection.java
 ```java
 package com.myapp.flashcards.model;
 
@@ -649,7 +737,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "collections")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -685,7 +774,14 @@ public class Collection {
 }
 ```
 
-### java\com\myapp\flashcards\model\ReviewAnswer.java
+### main\java\com\myapp\flashcards\model\IntervalUnit.java
+```java
+package com.myapp.flashcards.model;
+
+public enum IntervalUnit { MIN, DAY }
+```
+
+### main\java\com\myapp\flashcards\model\ReviewAnswer.java
 ```java
 package com.myapp.flashcards.model;
 
@@ -697,7 +793,7 @@ public enum ReviewAnswer {
 }
 ```
 
-### java\com\myapp\flashcards\model\User.java
+### main\java\com\myapp\flashcards\model\User.java
 ```java
 package com.myapp.flashcards.model;
 
@@ -709,7 +805,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -729,13 +826,15 @@ public class User {
 }
 ```
 
-### java\com\myapp\flashcards\repository\CardRepository.java
+### main\java\com\myapp\flashcards\repository\CardRepository.java
 ```java
 package com.myapp.flashcards.repository;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.myapp.flashcards.model.Card;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Set;
@@ -744,10 +843,28 @@ public interface CardRepository extends JpaRepository<Card, Integer> {
   Set<Card> findAllByCollectionId(Integer collectionId, Sort sort);
 
   Integer countByCollectionId(Integer collectionId);
+
+
+  /* новые (queue = 0) */
+  int countByCollectionIdAndQueue(Integer collectionId, int queue);
+
+  /* learning  (queue = 1)  + relearn (queue = 3) */
+  @Query("SELECT COUNT(c) FROM Card c WHERE c.collection.id = :cid AND c.queue IN (1,3)")
+  int countLearning(@Param("cid") Integer collectionId);
+
+  /* review‑карты, у которых dueDay ≤ :today */
+  @Query("""
+          SELECT COUNT(c) FROM Card c
+          WHERE c.collection.id = :cid
+            AND c.queue = 2
+            AND c.due <= :today
+          """)
+  int countDueReview(@Param("cid") Integer collectionId,
+                     @Param("today") int todayInDays);
 }
 ```
 
-### java\com\myapp\flashcards\repository\CardReviewHistoryRepository.java
+### main\java\com\myapp\flashcards\repository\CardReviewHistoryRepository.java
 ```java
 package com.myapp.flashcards.repository;
 
@@ -755,7 +872,7 @@ public interface CardReviewHistoryRepository {
 }
 ```
 
-### java\com\myapp\flashcards\repository\CollectionRepository.java
+### main\java\com\myapp\flashcards\repository\CollectionRepository.java
 ```java
 package com.myapp.flashcards.repository;
 
@@ -771,7 +888,7 @@ public interface CollectionRepository extends JpaRepository<Collection, Integer>
 }
 ```
 
-### java\com\myapp\flashcards\repository\UserRepository.java
+### main\java\com\myapp\flashcards\repository\UserRepository.java
 ```java
 package com.myapp.flashcards.repository;
 
@@ -786,7 +903,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 }
 ```
 
-### java\com\myapp\flashcards\security\CustomUserDetails.java
+### main\java\com\myapp\flashcards\security\CustomUserDetails.java
 ```java
 package com.myapp.flashcards.security;
 
@@ -845,7 +962,7 @@ public class CustomUserDetails implements UserDetails {
 }
 ```
 
-### java\com\myapp\flashcards\security\CustomUserDetailsService.java
+### main\java\com\myapp\flashcards\security\CustomUserDetailsService.java
 ```java
 package com.myapp.flashcards.security;
 
@@ -872,7 +989,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 }
 ```
 
-### java\com\myapp\flashcards\security\JwtAuthenticationFilter.java
+### main\java\com\myapp\flashcards\security\JwtAuthenticationFilter.java
 ```java
 package com.myapp.flashcards.security;
 
@@ -928,7 +1045,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 }
 ```
 
-### java\com\myapp\flashcards\security\JwtUtil.java
+### main\java\com\myapp\flashcards\security\JwtUtil.java
 ```java
 package com.myapp.flashcards.security;
 
@@ -987,15 +1104,67 @@ public class JwtUtil {
 }
 ```
 
-### java\com\myapp\flashcards\service\CardReviewService.java
+### main\java\com\myapp\flashcards\service\CardReviewService.java
 ```java
 package com.myapp.flashcards.service;
 
+import com.myapp.flashcards.model.Card;
+import com.myapp.flashcards.model.ReviewAnswer;
+import com.myapp.flashcards.repository.CardRepository;
+import com.myapp.flashcards.srs.DefaultSrsService;
+import com.myapp.flashcards.srs.SrsService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
 public class CardReviewService {
+
+  private final SrsService srsService;
+  private final CardService cardService;
+  private final CardRepository cardRepository;
+
+  /**
+   * Возвращает карточки, готовые к показу,
+   * предварительно переводя новые (queue=0) в learning.
+   */
+  public List<Card> startLearning(Integer collectionId) {
+
+    List<Card> due = srsService.getDueCards(collectionId, LocalDate.now());
+
+    // 1. Новые → learning + немедленно сохраняем
+    for (Card card : due) {
+      if (card.getQueue() == 0) {
+        srsService.initializeLearning(card);
+        cardRepository.save(card);           // flush в БД, чтобы queue = 1
+      }
+    }
+
+    // 2. Рассчитываем интервалы после перевода
+    ((DefaultSrsService) srsService).attachPreviewIntervals(due);
+
+    // 3. Сортировка: сначала те, что были new (теперь queue=1), потом по createdAt
+    return due.stream()
+            .sorted(Comparator
+                    .comparing(Card::getQueue)          // 1 → первых
+                    .thenComparing(Card::getCreatedAt))
+            .toList();
+  }
+
+  public Card gradeCard(Integer cardId, ReviewAnswer answer) {
+    Card card = cardService.getCardById(cardId)
+            .orElseThrow(() -> new RuntimeException("Card not found"));
+    srsService.processReview(card, answer);
+    return card;
+  }
 }
 ```
 
-### java\com\myapp\flashcards\service\CardService.java
+### main\java\com\myapp\flashcards\service\CardService.java
 ```java
 package com.myapp.flashcards.service;
 
@@ -1009,6 +1178,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
 
@@ -1060,10 +1231,26 @@ public class CardService {
   public Integer countByCollectionId(Integer collectionId) {
     return cardRepository.countByCollectionId(collectionId);
   }
+
+  public int countNew(Integer collId) {
+      return cardRepository.countByCollectionIdAndQueue(collId, 0);
+  }
+
+  public int countLearning(Integer collId) {
+      return cardRepository.countLearning(collId);
+  }
+
+  public int countDueReview(Integer collId) {
+      Collection coll = collectionRepository.findById(collId)
+               .orElseThrow(() -> new RuntimeException("Collection not found"));
+      int today = (int) ChronoUnit.DAYS.between(
+              coll.getCreatedAt().toLocalDate(), LocalDate.now());
+      return cardRepository.countDueReview(collId, today);
+  }
 }
 ```
 
-### java\com\myapp\flashcards\service\CollectionService.java
+### main\java\com\myapp\flashcards\service\CollectionService.java
 ```java
 package com.myapp.flashcards.service;
 
@@ -1117,7 +1304,7 @@ public class CollectionService {
 }
 ```
 
-### java\com\myapp\flashcards\service\UserService.java
+### main\java\com\myapp\flashcards\service\UserService.java
 ```java
 package com.myapp.flashcards.service;
 
@@ -1171,15 +1358,18 @@ public class UserService {
 }
 ```
 
-### java\com\myapp\flashcards\srs\DefaultSrsService.java
+### main\java\com\myapp\flashcards\srs\DefaultSrsService.java
 ```java
 package com.myapp.flashcards.srs;
 
+import com.myapp.flashcards.dto.NextIntervalDto;
 import com.myapp.flashcards.model.Card;
 import com.myapp.flashcards.model.Collection;
+import com.myapp.flashcards.model.IntervalUnit;
 import com.myapp.flashcards.model.ReviewAnswer;
 import com.myapp.flashcards.repository.CardRepository;
 import com.myapp.flashcards.repository.CollectionRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -1187,8 +1377,14 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.myapp.flashcards.model.IntervalUnit.DAY;
+import static com.myapp.flashcards.model.IntervalUnit.MIN;
+import static com.myapp.flashcards.model.ReviewAnswer.*;
 
 @Service
 @RequiredArgsConstructor
@@ -1202,51 +1398,118 @@ public class DefaultSrsService implements SrsService {
     // Перевод новой карточки в фазу Learning
     card.setType(1);   // 1 = learning
     card.setQueue(1);  // 1 = learn
-    card.setStepsLeft(SrsConfig.INITIAL_STEPS);
-    // первый шаг сразу же доступен
-    card.setDue((int) Instant.now().getEpochSecond());
+
+    card.setStepsLeft(SrsConfig.LEARNING_STEPS_MIN.length);
+    card.setDue((int) (Instant.now().getEpochSecond() +
+            SrsConfig.LEARNING_STEPS_MIN[0] * 60));
   }
 
+
   @Override
+  @Transactional
   public void processReview(Card card, ReviewAnswer quality) {
-    // 1) Если Again — начало переобучения
-    if (quality == ReviewAnswer.AGAIN) {
-      card.setLapses(card.getLapses() + 1);
-      card.setType(1);    // возвращаем в learning
-      card.setQueue(3);   // 3 = relearn
-      card.setStepsLeft(SrsConfig.INITIAL_STEPS);
-      card.setDue((int) Instant.now().getEpochSecond());
-      return;
+
+    /* -------------------------------------------------
+       0. Общие данные
+       ------------------------------------------------- */
+    long nowSec = Instant.now().getEpochSecond();
+    LocalDate createdDate = card.getCreatedAt().toLocalDate();
+    int daysFromCreation = (int) ChronoUnit.DAYS.between(createdDate, LocalDate.now());
+
+    /* -------------------------------------------------
+       1. Learning / Relearning
+       ------------------------------------------------- */
+    if (card.getQueue() == 1 || card.getQueue() == 3) {
+
+      // индекс текущего шага: 0 … (n‑1)
+      int stepIdx = SrsConfig.LEARNING_STEPS_MIN.length - card.getStepsLeft();
+
+      switch (quality) {
+
+        /* ----- Again ― начать с нуля ----- */
+        case AGAIN -> {
+          card.setLapses(card.getLapses() + 1);
+          card.setStepsLeft(SrsConfig.LEARNING_STEPS_MIN.length);
+          card.setDue((int) (nowSec + SrsConfig.LEARNING_STEPS_MIN[0] * 60));
+        }
+
+        /* ----- Hard ― повторить тот же шаг еще раз ----- */
+        case HARD -> {
+          // Anki: Hard = текущий шаг × HARD_FACTOR
+          int delayMin = (int) Math.round(
+                  SrsConfig.LEARNING_STEPS_MIN[stepIdx] * SrsConfig.HARD_FACTOR);
+          card.setDue((int) (nowSec + delayMin * 60));
+          // stepsLeft НЕ уменьшаем
+        }
+
+        /* ----- Good / Easy ----- */
+        case GOOD, EASY -> {
+          int remaining = card.getStepsLeft() - (quality == ReviewAnswer.GOOD ? 1 : card.getStepsLeft());
+
+          /* 2.1 Ещё остались learning‑шаги */
+          if (remaining > 0) {
+            card.setStepsLeft(remaining);
+            int nextIdx = SrsConfig.LEARNING_STEPS_MIN.length - remaining;
+            card.setDue((int) (nowSec + SrsConfig.LEARNING_STEPS_MIN[nextIdx] * 60));
+          }
+          /* 2.2 stepsLeft == 0  → выпуск в review */
+          else {
+            card.setStepsLeft(0);
+            card.setType(2);                        // review
+            card.setQueue(2);
+
+            int gradIvl = (quality == EASY)
+                    ? SrsConfig.EASY_GRADUATING_IVL   // 4 дня
+                    : 1;                              // Good → 1 день
+
+            card.setIvl(gradIvl);
+            card.setReps(card.getReps() + 1);
+            card.setDue(daysFromCreation + gradIvl);
+          }
+        }
+      }
+      return;      // learning‑ветка завершена
     }
 
-    // 2) Иначе — считаем новый интервал
-    int prevIvl = card.getIvl();
-    int delay = calculateDelay(card);
-    int newIvl = calculateNextInterval(prevIvl, quality, delay, card.getFactor());
-    newIvl = constrainInterval(newIvl);
+    /* -------------------------------------------------
+       3. Review‑карты
+       ------------------------------------------------- */
+    if (card.getQueue() == 2) {
 
-    // 3) Обновляем поля карточки
-    card.setIvl(newIvl);
-    card.setReps(card.getReps() + 1);
+      /* 3.1 Повтор с ошибкой → Relearning */
+      if (quality == AGAIN) {
+        card.setLapses(card.getLapses() + 1);
+        card.setType(1);               // learning
+        card.setQueue(3);              // relearn
+        card.setStepsLeft(SrsConfig.LEARNING_STEPS_MIN.length);
+        card.setDue((int) (nowSec + SrsConfig.LEARNING_STEPS_MIN[0] * 60));
+        return;
+      }
 
-    if (quality == ReviewAnswer.HARD) {
-      // уменьшаем factor, но не ниже MIN_FACTOR
-      int decreased = card.getFactor() - SrsConfig.HARD_FACTOR_DECREASE;
-      int newFactor = Math.max(decreased, SrsConfig.MIN_FACTOR);
-      card.setFactor(newFactor);
+      /* 3.2 Корректный ответ → новый интервал */
+      int prevIvl = card.getIvl();
+      int delay = calculateDelay(card);
+      int newIvl = calculateNextInterval(prevIvl, quality, delay, card.getFactor());
+      newIvl = constrainInterval(newIvl);
+
+      //‑‑‑ обновляем метрики
+      card.setIvl(newIvl);
+      card.setReps(card.getReps() + 1);
+
+      switch (quality) {
+        case HARD -> {
+          int decreased = card.getFactor() - SrsConfig.HARD_FACTOR_DECREASE;
+          card.setFactor(Math.max(decreased, SrsConfig.MIN_FACTOR));
+        }
+        case EASY -> {
+          int increased = (int) (card.getFactor() * SrsConfig.EASY_BONUS);
+          card.setFactor(increased);
+        }
+      }
+
+      //‑‑‑ планируем следующий показ
+      card.setDue(daysFromCreation + newIvl);
     }
-    if (quality == ReviewAnswer.EASY) {
-      // увеличим ease-factor чуть-чуть
-      int newFactor = (int) (card.getFactor() * SrsConfig.EASY_BONUS);
-      card.setFactor(newFactor);
-    }
-    card.setType(2);   // 2 = due/review
-    card.setQueue(2);  // 2 = review
-
-    // 4) Запланируем следующий показ (число дней от создания + newIvl)
-    LocalDate created = card.getCreatedAt().toLocalDate();
-    int daysSinceCreation = (int) ChronoUnit.DAYS.between(created, LocalDate.now());
-    card.setDue(daysSinceCreation + newIvl);
   }
 
   /**
@@ -1271,7 +1534,7 @@ public class DefaultSrsService implements SrsService {
                 case 1: // learning
                 case 3: // relearn
                   // due — это UNIX-метка для intraday
-                  return c.getDue() <= nowSec;
+                  return true;
                 case 2: // review
                   // due — это день от создания коллекции
                   return c.getDue() <= daysSinceCreation;
@@ -1328,10 +1591,60 @@ public class DefaultSrsService implements SrsService {
     }
     return interval;
   }
+
+  /**
+   * Предварительно рассчитывает интервалы для всех вариантов ответа.
+   */
+  public Map<ReviewAnswer, NextIntervalDto> previewIntervals(Card card) {
+
+    Map<ReviewAnswer, NextIntervalDto> m = new EnumMap<>(ReviewAnswer.class);
+
+    /* -------- Learning / Relearning -------- */
+    if (card.getQueue() == 1 || card.getQueue() == 3 || card.getQueue() == 0) {
+
+      int left = card.getStepsLeft();                 // 2 или 1
+      // «<1 мин» для Again всегда одинаково
+      m.put(AGAIN, new NextIntervalDto(AGAIN, 0, MIN));
+
+      if (left == 2) {          // первый learning‑шаг
+        m.put(HARD, new NextIntervalDto(HARD, 6, MIN)); // «<6 мин»
+        m.put(GOOD, new NextIntervalDto(GOOD, 10, MIN)); // «<10 мин»
+      } else {                  // left == 1 — последний learning‑шаг
+        m.put(HARD, new NextIntervalDto(HARD, 10, MIN)); // «<10 мин»
+        m.put(GOOD, new NextIntervalDto(GOOD, 1, DAY)); // «1 дн»
+      }
+      m.put(EASY, new NextIntervalDto(EASY, 2, DAY));      // «2 дн»
+      return m;
+    }
+
+    /* -------- Review -------- */
+    int prevIvl = card.getIvl();
+    int delay = calculateDelay(card);
+    int ef = card.getFactor();
+    m.put(AGAIN, new NextIntervalDto(AGAIN, 10, MIN));
+
+    m.put(HARD, new NextIntervalDto(HARD,
+            constrainInterval((int) (prevIvl * SrsConfig.HARD_FACTOR)), DAY));
+
+    m.put(GOOD, new NextIntervalDto(GOOD,
+            constrainInterval((int) ((prevIvl + delay / 2.0) * ef / 1000.0)), DAY));
+
+    m.put(EASY, new NextIntervalDto(EASY,
+            constrainInterval((int) ((prevIvl + delay) * ef / 1000.0 * SrsConfig.EASY_BONUS)), DAY));
+
+    return m;
+  }
+
+  /**
+   * Заполняет поле newIntervals у каждой карточки.
+   */
+  public void attachPreviewIntervals(List<Card> cards) {
+    cards.forEach(c -> c.setNewIntervals(previewIntervals(c)));
+  }
 }
 ```
 
-### java\com\myapp\flashcards\srs\SrsConfig.java
+### main\java\com\myapp\flashcards\srs\SrsConfig.java
 ```java
 package com.myapp.flashcards.srs;
 
@@ -1344,10 +1657,15 @@ public class SrsConfig {
   public static final int INITIAL_STEPS = 2;    // default learning steps
   public static final int MIN_FACTOR = 1300;  // минимум для ease-фактора
   public static final int HARD_FACTOR_DECREASE = 150;   // насколько понижаем (в промилле)
+  public static final int AGAIN_DELAY_SEC = 0; // сразу
+  public static final int HARD_DELAY_MIN = 600; // 10 минут
+  public static final int GOOD_DELAY_MIN = 600; // 10 минут
+  public static final int EASY_GRADUATING_IVL = 4; // 4 дня, как в Anki
+  public static final int[] LEARNING_STEPS_MIN = {1, 10}; // пример: 1 мин и 10 мин
 }
 ```
 
-### java\com\myapp\flashcards\srs\SrsService.java
+### main\java\com\myapp\flashcards\srs\SrsService.java
 ```java
 package com.myapp.flashcards.srs;
 
@@ -1368,9 +1686,7 @@ public interface SrsService {
    * Обрабатывает нажатие кнопки оценки (Again/Hard/Good/Easy).
    * Пересчитывает ivl, factor, reps, lapses, due, queue, stepsLeft.
    */
-  default void processReview(Card card, ReviewAnswer quality) {
-
-  }
+  void processReview(Card card, ReviewAnswer quality);
 
   /**
    * Возвращает список карточек, которые сегодня надо показать:
@@ -1383,7 +1699,7 @@ public interface SrsService {
 
 ```
 
-### resources\application.yaml
+### main\resources\application.yaml
 ```yaml
 spring:
   datasource:
@@ -1414,7 +1730,7 @@ jwt:
   expirationMs: 86400000
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\01-changeset-users-table.xml
+### main\resources\db\changelog\v.1.0.0_initial-schema\01-changeset-users-table.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
@@ -1443,7 +1759,7 @@ jwt:
 </databaseChangeLog>
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\01-create-users-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\01-create-users-table.sql
 ```sql
 -- Таблица пользователей
 CREATE TABLE users (
@@ -1454,12 +1770,12 @@ CREATE TABLE users (
 );
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\01-drop-users-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\01-drop-users-table.sql
 ```sql
 DROP TABLE users;
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\10-changeset-collections-table.xml
+### main\resources\db\changelog\v.1.0.0_initial-schema\10-changeset-collections-table.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
@@ -1488,7 +1804,7 @@ DROP TABLE users;
 </databaseChangeLog>
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\10-create-collections-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\10-create-collections-table.sql
 ```sql
 -- Таблица коллекций
 CREATE TABLE collections (
@@ -1500,12 +1816,12 @@ CREATE TABLE collections (
 );
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\10-drop-collections-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\10-drop-collections-table.sql
 ```sql
 DROP TABLE collections;
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\20-changeset-cards-table.xml
+### main\resources\db\changelog\v.1.0.0_initial-schema\20-changeset-cards-table.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
@@ -1534,7 +1850,7 @@ DROP TABLE collections;
 </databaseChangeLog>
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\20-create-cards-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\20-create-cards-table.sql
 ```sql
 CREATE TABLE cards
 (
@@ -1554,12 +1870,12 @@ CREATE TABLE cards
 );
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\20-drop-cards-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\20-drop-cards-table.sql
 ```sql
 DROP TABLE cards;
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\30-changeset-repetitions-table.xml
+### main\resources\db\changelog\v.1.0.0_initial-schema\30-changeset-repetitions-table.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
@@ -1580,7 +1896,7 @@ DROP TABLE cards;
 </databaseChangeLog>
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\30-create-repetitions-table.sql
+### main\resources\db\changelog\v.1.0.0_initial-schema\30-create-repetitions-table.sql
 ```sql
 CREATE TABLE repetitions
 (
@@ -1588,7 +1904,7 @@ CREATE TABLE repetitions
 );
 ```
 
-### resources\db\changelog\v.1.0.0_initial-schema\db.changelog-v.1.0.0_initial-schema.xml
+### main\resources\db\changelog\v.1.0.0_initial-schema\db.changelog-v.1.0.0_initial-schema.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
@@ -1604,12 +1920,12 @@ CREATE TABLE repetitions
 </databaseChangeLog>
 ```
 
-### resources\db-init\initdb.sql
+### main\resources\db-init\initdb.sql
 ```sql
 CREATE SCHEMA IF NOT EXISTS flashcards;
 ```
 
-### resources\db.changelog-master.xml
+### main\resources\db.changelog-master.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
@@ -1631,7 +1947,26 @@ CREATE SCHEMA IF NOT EXISTS flashcards;
 </databaseChangeLog>
 ```
 
-### resources\graphql\card.graphqls
+### main\resources\graphql\card-review.graphqls
+```
+extend type Query {
+    startLearning(collectionId: ID!): [Card!]!
+}
+
+extend type Mutation {
+    reviewCard(cardId: ID!, answer: ReviewAnswer!): Card!
+}
+
+enum ReviewAnswer {
+    AGAIN
+    HARD
+    GOOD
+    EASY
+}
+
+```
+
+### main\resources\graphql\card.graphqls
 ```
 scalar LocalDateTime
 
@@ -1665,10 +2000,11 @@ type Card {
     reps: Int!
     lapses: Int!
     stepsLeft: Int!
+    newIntervals: [NextInterval!]! # <‑‑ новое поле
 }
 ```
 
-### resources\graphql\collection.graphqls
+### main\resources\graphql\collection.graphqls
 ```
 extend type Query {
     collection(id: ID!): Collection
@@ -1693,10 +2029,25 @@ type Collection {
     user: User
     cards: [Card]
     countCards: Int
+    newCount: Int          # ← новые
+    learningCount: Int     # ← learning + relearn
+    reviewCount: Int       # ← к повторению
+}
+
+```
+
+### main\resources\graphql\nextInterval.graphqls
+```
+enum IntervalUnit { MIN DAY }
+
+type NextInterval {
+    answer: ReviewAnswer!
+    interval: Int!         # число
+    unit: IntervalUnit! # MIN или DAY
 }
 ```
 
-### resources\graphql\user.graphqls
+### main\resources\graphql\user.graphqls
 ```
 type Query {
     user(id: ID!): User!
@@ -1722,126 +2073,3 @@ input UserInp {
 }
 ```
 
-```xml
-
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
-
-    <groupId>com.myapp</groupId>
-    <artifactId>flashcards</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>flashcards</name>
-    <description>flashcards</description>
-
-    <properties>
-        <java.version>17</java.version>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-graphql</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>1.5.5.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>1.5.5.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
-            <scope>runtime</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-</project>
-```
-
-- Мне надо добавить алгоритм интервального повторения
-- Используй код из репозитория anki для интервального повторения

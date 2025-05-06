@@ -240,24 +240,18 @@ public class DefaultSrsService implements SrsService {
     /* -------- Learning / Relearning -------- */
     if (card.getQueue() == 1 || card.getQueue() == 3 || card.getQueue() == 0) {
 
-      int stepIdx = SrsConfig.LEARNING_STEPS_MIN.length - card.getStepsLeft();
-      if (stepIdx < 0) stepIdx = 0;
-      int curMin = SrsConfig.LEARNING_STEPS_MIN[stepIdx];
+      int left = card.getStepsLeft();                 // 2 или 1
+      // «<1 мин» для Again всегда одинаково
+      m.put(AGAIN, new NextIntervalDto(AGAIN, 0, MIN));
 
-      m.put(AGAIN, new NextIntervalDto(AGAIN, 0, IntervalUnit.MIN));
-
-      /* Hard = текущий шаг × 1.2  (минуты) */
-      m.put(HARD, new NextIntervalDto(HARD,
-              (int) Math.round(curMin * SrsConfig.HARD_FACTOR),
-              IntervalUnit.MIN));
-
-      /* Good = тот же шаг без изменений (минуты) */
-      m.put(GOOD, new NextIntervalDto(GOOD, curMin, IntervalUnit.MIN));
-
-      /* Easy = graduating ‑ 4 дня */
-      m.put(EASY, new NextIntervalDto(EASY,
-              SrsConfig.EASY_GRADUATING_IVL,
-              IntervalUnit.DAY));
+      if (left == 2) {          // первый learning‑шаг
+        m.put(HARD, new NextIntervalDto(HARD, 6, MIN)); // «<6 мин»
+        m.put(GOOD, new NextIntervalDto(GOOD, 10, MIN)); // «<10 мин»
+      } else {                  // left == 1 — последний learning‑шаг
+        m.put(HARD, new NextIntervalDto(HARD, 10, MIN)); // «<10 мин»
+        m.put(GOOD, new NextIntervalDto(GOOD, 1, DAY)); // «1 дн»
+      }
+      m.put(EASY, new NextIntervalDto(EASY, 2, DAY));      // «2 дн»
       return m;
     }
 
@@ -265,8 +259,7 @@ public class DefaultSrsService implements SrsService {
     int prevIvl = card.getIvl();
     int delay = calculateDelay(card);
     int ef = card.getFactor();
-
-    m.put(AGAIN, new NextIntervalDto(AGAIN, SrsConfig.LEARNING_STEPS_MIN[0], MIN));
+    m.put(AGAIN, new NextIntervalDto(AGAIN, 10, MIN));
 
     m.put(HARD, new NextIntervalDto(HARD,
             constrainInterval((int) (prevIvl * SrsConfig.HARD_FACTOR)), DAY));

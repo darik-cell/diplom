@@ -1,100 +1,56 @@
 @startuml
-' --- Цвета для каждого стейта по стереотипу ---
-skinparam state<<New>> BackgroundColor LightBlue
-skinparam state<<Learning>> BackgroundColor LightYellow
-skinparam state<<Review>> BackgroundColor LightGreen
+!pragma layout smetana                       ' горизонтальная ориентация
+
+'‑‑‑ Цвета состояний
+skinparam state<<New>>        BackgroundColor LightBlue
+skinparam state<<Learning>>   BackgroundColor LightYellow
+skinparam state<<Review>>     BackgroundColor LightGreen
 skinparam state<<Relearning>> BackgroundColor LightSalmon
 
-' --- Стартовый псевдостейт ---
-[*] --> New
-
-' --- Состояние New (новая карта) ---
-state New <<New>>
-New : Learning Steps: 1m, 10m, 1d…
-
-' --- Переход в обучение ---
-New --> Learning : показать карту\n(ответ)
-
-' --- Состояние Learning (фаза обучения) ---
-state Learning <<Learning>>
-Learning : шаги обучения из конфига\n(e.g. 1m → 10m → 1d)
-
-' --- Переходы внутри Learning ---
-Learning --> Learning : Again\n(если тот же шаг)
-Learning --> Learning : Good\n(следующий шаг)
-Learning --> Review   : Good\n(последний шаг)
-Learning --> Review   : Easy
-
-' --- Состояние Review (повторение) ---
-state Review <<Review>>
-Review : review по SRS\n(ivl×factor, hardFactor, easyBonus)
-
-' --- Переходы внутри Review ---
-Review --> Review    : Hard\n(ivl×hardFactor)
-Review --> Review    : Good\n(ivl×factor)
-Review --> Review    : Easy\n(ivl×factor×easyBonus)
-Review --> Relearning: Again\n(lapse → relearning)
-
-' --- Состояние Relearning (переобучение) ---
-state Relearning <<Relearning>>
-Relearning : шаги relearning\nиз конфига + minInterval
-
-' --- Завершение переобучения ---
-Relearning --> Review : по завершении всех шагов
-
-@enduml
-
-
-
-@startuml
-' Горизонтальная ориентация диаграммы
-left to right direction
-
-' Настройка цветов для стереотипов состояний
-skinparam state<<New>> BackgroundColor LightBlue
-skinparam state<<Learning>> BackgroundColor LightYellow
-skinparam state<<Review>> BackgroundColor LightGreen
-skinparam state<<Relearning>> BackgroundColor LightSalmon
-
-' Псевдостейт «старт»
 [*] --> New
 
 state New <<New>>
-New : Learning Steps: 1m, 10m, 1d…
-' Состояние New (новая карта)
+New : Шаги изучения\n1 м → 10 м → 1 дн…
 
-' Переход в первую фазу обучения
-New --> Learning : показать карту\n(ответ)
-
-' Состояние Learning (фаза обучения)
+New --> Learning : показать карту
 
 state Learning <<Learning>>
-Learning : шаги обучения из конфига\n(e.g. 1m → 10m → 1d)
-' Внутренние переходы Learning
-Learning --> Learning : Again\n(тот же шаг)
-Learning --> Learning : Good\n(следующий шаг)
-Learning --> Review   : Good\n(последний шаг)
-Learning --> Review   : Easy
+Learning : Фаза обучения\n(10 м → 1 дн)
 
-' Состояние Review (повторение)
+' ——— переходы внутри Learning ———
+Learning --> Learning
+note on link
+  **Again** — повторить тот же шаг
+  **Hard**  — тот же шаг × HardFactor
+end note
+
+Learning --> Review
+note on link
+  **Good** (последний шаг) — выпуск в Review
+  **Easy** — выпуск в Review, интервал 2 дн
+end note
+
 state Review <<Review>>
-Review : review по SRS\n(ivl×factor, hardFactor, easyBonus)
+Review : Повторение по SRS
 
-' Переходы Review
-Review --> Review     : Hard\n(ivl × hardFactor)
-Review --> Review     : Good\n(ivl × factor)
-Review --> Review     : Easy\n(ivl × factor × easyBonus)
-Review --> Relearning : Again\n(lapse → relearning)
+' ——— переходы внутри Review ———
+Review --> Review
+note on link
+  **Hard** — ivl × hardFactor
+  **Good** — ivl × easeFactor
+  **Easy** — ivl × easeFactor × easyBonus
+end note
 
-' Состояние Relearning (переобучение)
+Review --> Relearning
+note on link
+  **Again** — ошибка ⇒ карта в Relearning
+end note
+
 state Relearning <<Relearning>>
-Relearning : шаги relearning\nиз конфига + minInterval
+Relearning : Шаги переобучения
 
-' Возврат в Review после переобучения
 Relearning --> Review : по завершении шагов
-
 @enduml
-
 
 @startuml
 |User|
@@ -123,3 +79,165 @@ endif
 stop
 @enduml
 
+
+@startuml
+title Цикл Active Recall
+
+state Чтение
+state "Активное\nвоспоминание"
+state Повторение
+
+[*] --> Чтение
+Чтение --> "Активное\nвоспоминание"
+"Активное\nвоспоминание" --> Повторение
+Повторение --> Чтение
+@enduml
+@startuml
+title Цикл активное воспоминание
+left to right direction
+
+state S1 as "Чтение"
+state S2 as "Активное\nвоспоминание"
+state S3 as "Повторение"
+
+[*] --> S1
+S1 --> S2
+S2 --> S3
+S3 --> S1
+@enduml
+
+@startuml
+!pragma layout smetana
+skinparam componentStyle rectangle
+
+' Внешний клиент
+rectangle "Клиент" as Client
+
+' Фронтенд
+rectangle "Frontend\n(React)" as Frontend {
+  component "Pages\n(React Views)" as Pages
+  component "UI Components\n(Контейнеры)" as UI
+  component "State Management\n(Redux/Context)" as State
+  component "Custom Hooks\n(Переиспольз. логика)" as Hooks
+  component "Routing\n(React Router)" as Routing
+  component "GraphQL Client\n(Apollo Client)" as GQLClient
+}
+
+' Бэкенд
+rectangle "Backend\n(Spring Boot + GraphQL)" as Backend {
+  component "GraphQL Endpoint\n(Spring for GraphQL)" as GQLEndpoint
+  component "Сервисный слой\n(Services)" as Service
+  component "Слой доступа к данным\n(JPA Repositories)" as DAO
+  component "Сервис аутентификации\n(Spring Security + JWT)" as Auth
+}
+
+' База данных
+database "PostgreSQL" as DB
+
+' Связи между основными подсистемами
+Client --> Frontend : "HTTP/HTTPS запросы"
+
+' Внутренние связи фронтенда
+Pages --> UI : "Композиция интерфейса"
+Pages --> State : "Чтение/обновление состояния"
+UI --> State : "Диспетчеризация действий"
+Routing --> Pages : "Маршрутизация"
+Pages --> GQLClient : "Обращение к API"
+Hooks --> Pages : "Переисп. логика"
+
+' Внутренние связи бэкенда
+GQLClient --> GQLEndpoint : "HTTP GraphQL"
+GQLEndpoint --> Service : "Вызов сервисов"
+Service --> DAO : "Работа с репозиториями"
+Auth --> GQLEndpoint : "Проверка токена"
+Auth --> DAO : "Получение учётных данных"
+
+' Связь DAO с БД
+DAO --> DB : "JDBC / Hibernate"
+
+@enduml
+
+@startuml
+!pragma layout smetana
+left to right direction
+actor "Гость" as Guest
+actor "Пользователь" as User
+
+
+(Регистрация) as UC_Register
+(Логин)       as UC_Login
+(Просмотр колод) as UC_ViewColl
+(Создать колоду) as UC_AddColl
+(Удалить колоду) as UC_DelColl
+(Добавить/редактировать карточку) as UC_SaveCard
+(Просмотр/поиск карточек) as UC_EditCards
+(Запуск сессии\nобучения/повторения) as UC_StartLearn
+(Оценить карточку) as UC_Review
+(Видеть счётчики\nпрогресса) as UC_Counters
+
+Guest --> UC_Register
+Guest --> UC_Login
+
+User --> UC_ViewColl
+User --> UC_AddColl
+User --> UC_DelColl
+User --> UC_SaveCard
+User --> UC_EditCards
+User --> UC_StartLearn
+User --> UC_Review
+User --> UC_Counters
+@enduml
+
+@startuml
+' ========== SEQUENCE: Режим обучения ==========
+autonumber
+skinparam sequenceMessageAlign center
+
+actor  Пользователь as User
+participant "Компонент\nRepeatCards (React)"    as React
+participant "Apollo Client"                     as Apollo
+participant "GraphQL‑endpoint"      as GQL
+participant "CardReviewController"              as Ctrl
+participant "CardReviewService"                 as Service
+participant "DefaultSrsService"                 as Srs
+participant "CardRepository"                    as Repo
+database   "PostgreSQL"                         as DB
+
+== 1. Старт сессии обучения ==
+User   -> React  : клик «Начать обучение»
+React  -> Apollo : GraphQL query `startLearning`
+Apollo -> GQL    : HTTP POST /graphql
+GQL    -> Ctrl   : startLearning()
+Ctrl   -> Service: startLearning()
+Service-> Srs    : getDueCards()
+Srs    -> Repo   : SELECT карты
+Repo   -> DB     : SQL
+DB     --> Repo
+Repo   --> Srs
+Srs    -> Repo   : UPDATE new→learning
+Repo   -> DB
+Srs    --> Service : список с интервалами
+Service --> Ctrl
+Ctrl   --> GQL
+GQL    --> Apollo
+Apollo --> React  : отрисовать карты
+
+== 2. Ответ пользователя на карточку ==
+loop пока есть карточки
+  React  -> Apollo : mutation `reviewCard`
+  Apollo -> GQL    : HTTP POST
+  GQL    -> Ctrl   : reviewCard()
+  Ctrl   -> Service: gradeCard()
+  Service-> Srs    : processReview()
+  Srs    -> Repo   : UPDATE SRS‑полей
+  Repo   -> DB
+  Srs    --> Service
+  Service --> Ctrl
+  Ctrl   --> GQL
+  GQL    --> Apollo
+  Apollo --> React : показать следующую карту
+end
+
+== 3. Завершение сессии ==
+React --> User : «Все карточки\nпройдены»
+@enduml

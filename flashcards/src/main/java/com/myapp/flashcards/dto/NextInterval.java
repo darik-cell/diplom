@@ -10,5 +10,5 @@ import lombok.Data;
 public class NextInterval {
   private ReviewAnswer answer;
   private Integer interval;
-  private IntervalUnit intervalUnit;
+  private IntervalUnit unit;
 }
