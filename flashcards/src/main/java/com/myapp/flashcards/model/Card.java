@@ -1,5 +1,6 @@
 package com.myapp.flashcards.model;
 
+import com.myapp.flashcards.dto.NextIntervalDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -62,7 +63,7 @@ public class Card {
   private Integer stepsLeft;
 
   @Transient
-  private Map<ReviewAnswer, Integer> newIntervals = new EnumMap<>(ReviewAnswer.class);
+  private Map<ReviewAnswer, NextIntervalDto> newIntervals = new EnumMap<>(ReviewAnswer.class);
 
   public void setCollection(Collection collection) {
     this.collection = collection;

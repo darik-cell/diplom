@@ -21,4 +21,8 @@ type Collection {
     user: User
     cards: [Card]
     countCards: Int
+    newCount: Int          # ← новые
+    learningCount: Int     # ← learning + relearn
+    reviewCount: Int       # ← к повторению
 }
+

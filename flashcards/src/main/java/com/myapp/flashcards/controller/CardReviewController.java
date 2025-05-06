@@ -33,10 +33,10 @@ public class CardReviewController {
   /**
    * Маппинг GraphQL поля Card.newIntervals → DTO NextInterval
    */
-  @SchemaMapping
-  public List<NextInterval> newIntervals(Card card) {
-    return card.getNewIntervals().entrySet().stream()
-            .map(e -> new NextInterval(e.getKey(), e.getValue()))
+  @SchemaMapping(typeName = "Card", field = "newIntervals")
+  public List<NextInterval> newIntervals(Card c) {
+    return c.getNewIntervals().values().stream()
+            .map(dto -> new NextInterval(dto.answer(), dto.interval(), dto.unit()))
             .toList();
   }
 }

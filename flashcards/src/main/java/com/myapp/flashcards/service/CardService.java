@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,5 +62,21 @@ public class CardService {
 
   public Integer countByCollectionId(Integer collectionId) {
     return cardRepository.countByCollectionId(collectionId);
+  }
+
+  public int countNew(Integer collId) {
+      return cardRepository.countByCollectionIdAndQueue(collId, 0);
+  }
+
+  public int countLearning(Integer collId) {
+      return cardRepository.countLearning(collId);
+  }
+
+  public int countDueReview(Integer collId) {
+      Collection coll = collectionRepository.findById(collId)
+               .orElseThrow(() -> new RuntimeException("Collection not found"));
+      int today = (int) ChronoUnit.DAYS.between(
+              coll.getCreatedAt().toLocalDate(), LocalDate.now());
+      return cardRepository.countDueReview(collId, today);
   }
 }

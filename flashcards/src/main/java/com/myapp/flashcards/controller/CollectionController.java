@@ -52,4 +52,19 @@ public class CollectionController {
   public Integer countCards(Collection collection) {
     return cardService.countByCollectionId(collection.getId());
   }
+
+  @SchemaMapping(typeName = "Collection", field = "newCount")
+  public Integer newCount(Collection collection) {
+    return cardService.countNew(collection.getId());
+  }
+
+  @SchemaMapping(typeName = "Collection", field = "learningCount")
+  public Integer learningCount(Collection collection) {
+    return cardService.countLearning(collection.getId());
+  }
+
+  @SchemaMapping(typeName = "Collection", field = "reviewCount")
+  public Integer reviewCount(Collection collection) {
+    return cardService.countDueReview(collection.getId());
+  }
 }

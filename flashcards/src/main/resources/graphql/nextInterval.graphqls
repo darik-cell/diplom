@@ -1,0 +1,7 @@
+enum IntervalUnit { MIN DAY }
+
+type NextInterval {
+    answer: ReviewAnswer!
+    interval: Int!         # число
+    unit: IntervalUnit! # MIN или DAY
+}

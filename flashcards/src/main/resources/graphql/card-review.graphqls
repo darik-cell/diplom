@@ -13,7 +13,3 @@ enum ReviewAnswer {
     EASY
 }
 
-type NextInterval {
-    answer: ReviewAnswer!
-    interval: Int!   # в днях
-}

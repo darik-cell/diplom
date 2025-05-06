@@ -1,7 +1,9 @@
 package com.myapp.flashcards.srs;
 
+import com.myapp.flashcards.dto.NextIntervalDto;
 import com.myapp.flashcards.model.Card;
 import com.myapp.flashcards.model.Collection;
+import com.myapp.flashcards.model.IntervalUnit;
 import com.myapp.flashcards.model.ReviewAnswer;
 import com.myapp.flashcards.repository.CardRepository;
 import com.myapp.flashcards.repository.CollectionRepository;
@@ -17,6 +19,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.myapp.flashcards.model.IntervalUnit.DAY;
+import static com.myapp.flashcards.model.IntervalUnit.MIN;
+import static com.myapp.flashcards.model.ReviewAnswer.*;
 
 @Service
 @RequiredArgsConstructor
@@ -90,7 +96,7 @@ public class DefaultSrsService implements SrsService {
             card.setType(2);                        // review
             card.setQueue(2);
 
-            int gradIvl = (quality == ReviewAnswer.EASY)
+            int gradIvl = (quality == EASY)
                     ? SrsConfig.EASY_GRADUATING_IVL   // 4 дня
                     : 1;                              // Good → 1 день
 
@@ -109,7 +115,7 @@ public class DefaultSrsService implements SrsService {
     if (card.getQueue() == 2) {
 
       /* 3.1 Повтор с ошибкой → Relearning */
-      if (quality == ReviewAnswer.AGAIN) {
+      if (quality == AGAIN) {
         card.setLapses(card.getLapses() + 1);
         card.setType(1);               // learning
         card.setQueue(3);              // relearn
@@ -120,9 +126,9 @@ public class DefaultSrsService implements SrsService {
 
       /* 3.2 Корректный ответ → новый интервал */
       int prevIvl = card.getIvl();
-      int delay   = calculateDelay(card);
-      int newIvl  = calculateNextInterval(prevIvl, quality, delay, card.getFactor());
-      newIvl      = constrainInterval(newIvl);
+      int delay = calculateDelay(card);
+      int newIvl = calculateNextInterval(prevIvl, quality, delay, card.getFactor());
+      newIvl = constrainInterval(newIvl);
 
       //‑‑‑ обновляем метрики
       card.setIvl(newIvl);
@@ -166,7 +172,7 @@ public class DefaultSrsService implements SrsService {
                 case 1: // learning
                 case 3: // relearn
                   // due — это UNIX-метка для intraday
-                  return c.getDue() <= nowSec;
+                  return true;
                 case 2: // review
                   // due — это день от создания коллекции
                   return c.getDue() <= daysSinceCreation;
@@ -227,29 +233,51 @@ public class DefaultSrsService implements SrsService {
   /**
    * Предварительно рассчитывает интервалы для всех вариантов ответа.
    */
-  public Map<ReviewAnswer, Integer> previewIntervals(Card card) {
-    Map<ReviewAnswer, Integer> map = new EnumMap<>(ReviewAnswer.class);
+  public Map<ReviewAnswer, NextIntervalDto> previewIntervals(Card card) {
 
-    if (card.getQueue() == 0) {                       // новая карточка
-      map.put(ReviewAnswer.AGAIN, SrsConfig.AGAIN_DELAY_SEC / 86_400);
-      map.put(ReviewAnswer.HARD,  SrsConfig.HARD_DELAY_MIN / 1_440);
-      map.put(ReviewAnswer.GOOD,  SrsConfig.GOOD_DELAY_MIN / 1_440);
-      map.put(ReviewAnswer.EASY,  SrsConfig.EASY_GRADUATING_IVL);
-      return map;
+    Map<ReviewAnswer, NextIntervalDto> m = new EnumMap<>(ReviewAnswer.class);
+
+    /* -------- Learning / Relearning -------- */
+    if (card.getQueue() == 1 || card.getQueue() == 3 || card.getQueue() == 0) {
+
+      int stepIdx = SrsConfig.LEARNING_STEPS_MIN.length - card.getStepsLeft();
+      if (stepIdx < 0) stepIdx = 0;
+      int curMin = SrsConfig.LEARNING_STEPS_MIN[stepIdx];
+
+      m.put(AGAIN, new NextIntervalDto(AGAIN, 0, IntervalUnit.MIN));
+
+      /* Hard = текущий шаг × 1.2  (минуты) */
+      m.put(HARD, new NextIntervalDto(HARD,
+              (int) Math.round(curMin * SrsConfig.HARD_FACTOR),
+              IntervalUnit.MIN));
+
+      /* Good = тот же шаг без изменений (минуты) */
+      m.put(GOOD, new NextIntervalDto(GOOD, curMin, IntervalUnit.MIN));
+
+      /* Easy = graduating ‑ 4 дня */
+      m.put(EASY, new NextIntervalDto(EASY,
+              SrsConfig.EASY_GRADUATING_IVL,
+              IntervalUnit.DAY));
+      return m;
     }
 
+    /* -------- Review -------- */
     int prevIvl = card.getIvl();
     int delay = calculateDelay(card);
+    int ef = card.getFactor();
 
-    map.put(ReviewAnswer.AGAIN, 0); // пересмотр в тот же день
-    map.put(ReviewAnswer.HARD,  constrainInterval(
-            (int) (prevIvl * SrsConfig.HARD_FACTOR)));
-    map.put(ReviewAnswer.GOOD,  constrainInterval(
-            (int) ((prevIvl + delay / 2.0) * card.getFactor() / 1000.0)));
-    map.put(ReviewAnswer.EASY,  constrainInterval(
-            (int) ((prevIvl + delay) * card.getFactor() / 1000.0 * SrsConfig.EASY_BONUS)));
+    m.put(AGAIN, new NextIntervalDto(AGAIN, SrsConfig.LEARNING_STEPS_MIN[0], MIN));
 
-    return map;
+    m.put(HARD, new NextIntervalDto(HARD,
+            constrainInterval((int) (prevIvl * SrsConfig.HARD_FACTOR)), DAY));
+
+    m.put(GOOD, new NextIntervalDto(GOOD,
+            constrainInterval((int) ((prevIvl + delay / 2.0) * ef / 1000.0)), DAY));
+
+    m.put(EASY, new NextIntervalDto(EASY,
+            constrainInterval((int) ((prevIvl + delay) * ef / 1000.0 * SrsConfig.EASY_BONUS)), DAY));
+
+    return m;
   }
 
   /**

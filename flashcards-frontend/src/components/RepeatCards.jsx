@@ -1,8 +1,9 @@
 // src/components/RepeatCards.jsx
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Container, Button, Spinner } from 'react-bootstrap';
-import { gql, useQuery, useMutation } from '@apollo/client';
-import { useParams, Link } from 'react-router-dom';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
+import CardCounter from './CardCounter';
+import {Container, Button, Spinner, Row, Col} from 'react-bootstrap';
+import {gql, useQuery, useMutation} from '@apollo/client';
+import {useParams, Link} from 'react-router-dom';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -15,7 +16,7 @@ import 'katex/dist/katex.min.css';
 import 'highlight.js/styles/github.css';
 import 'github-markdown-css/github-markdown.css';
 
-import { processMarkedText } from '../utils/highlightLogic';   // ваша функция ??...??
+import {processMarkedText} from '../utils/highlightLogic';   // ваша функция ??...??
 
 /* ---------- GraphQL ---------- */
 
@@ -49,11 +50,12 @@ const REVIEW_CARD = gql`
 /* ---------- Компонент ---------- */
 
 const RepeatCards = () => {
-    const { collectionId } = useParams();
+    const {collectionId} = useParams();
 
     /* --- Запрашиваем список due‑карточек --- */
-    const { loading, error, data, refetch } = useQuery(START_LEARNING, {
-        variables: { collectionId }
+    const {loading, error, data, refetch} = useQuery(START_LEARNING, {
+        variables: {collectionId},
+        fetchPolicy: 'network-only',
     });
 
     /* --- Сохраняем индекс текущей карточки --- */
@@ -79,11 +81,16 @@ const RepeatCards = () => {
 
     /* --- Если всё пройдено --- */
     const finished = !loading && cards.length === 0;
+    const remaining = useMemo(() => ({
+        new: cards.filter(c => c.queue === 0).length,
+        learning: cards.filter(c => c.queue === 1 || c.queue === 3).length,
+        review: cards.filter(c => c.queue === 2).length,
+    }), [cards]);
 
     /* ---------- Cloze‑логика (??...??) ---------- */
-    const [displayText, setDisplayText]   = useState('');
-    const [hidden, setHidden]             = useState([]);  // оригиналы
-    const [revealIdx, setRevealIdx]       = useState(0);   // сколько уже раскрыто
+    const [displayText, setDisplayText] = useState('');
+    const [hidden, setHidden] = useState([]);  // оригиналы
+    const [revealIdx, setRevealIdx] = useState(0);   // сколько уже раскрыто
 
     /* Пересчёт текста при смене карточки */
     useEffect(() => {
@@ -107,74 +114,86 @@ const RepeatCards = () => {
 
     /* ---------- Оценка карточки ---------- */
     const answer = (ans) => {
-        reviewCard({ variables: { cardId: cards[idx].id, answer: ans } });
+        reviewCard({variables: {cardId: cards[idx].id, answer: ans}});
     };
 
     /* ---------- UI ---------- */
 
     if (loading) return <Container className="mt-4"><Spinner/></Container>;
-    if (error)   return <Container className="mt-4">Ошибка: {error.message}</Container>;
+    if (error) return <Container className="mt-4">Ошибка: {error.message}</Container>;
     if (finished) return (
-        <Container className="mt-4" style={{textAlign:'center'}}>
+        <Container className="mt-4" style={{textAlign: 'center'}}>
             <h2>Все карточки на сегодня пройдены 🎉</h2>
             <Link to="/">На главную</Link>
         </Container>
     );
 
     const current = cards[idx];
-    const intervals = Object.fromEntries(current.newIntervals.map(i => [i.answer, i.interval]));
+
+    const fmt = (n, u) => (u === 'MIN' ? `${n} мин` : `${n} дн`);
+
+    const intervals = Object.fromEntries(
+        current.newIntervals.map(i => [i.answer, fmt(i.interval, i.unit)])
+    );
 
     return (
-        <Container className="mt-4">
-
-            {/* --- Текст карточки --- */}
-            <div
-                className="markdown-body border p-3 mb-3"
-                style={{minHeight:'120px'}}
-                tabIndex={0}
-                onKeyDown={handleTab}
-            >
-                <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeKatex, rehypeHighlight, rehypeRaw]}
-                >
-                    {displayText}
-                </ReactMarkdown>
-            </div>
-
-            {/* --- Кнопки оценки --- */}
-            <div className="d-flex justify-content-between mb-3">
-
-                {['AGAIN','HARD','GOOD','EASY'].map((k) => (
-                    <div key={k} className="text-center flex-fill mx-1">
-                        <small className="text-muted">
-                            {intervals[k] ?? '-'} дн
-                        </small><br/>
-                        <Button
-                            variant={
-                                k==='AGAIN' ? 'danger' :
-                                    k==='HARD'  ? 'warning' :
-                                        k==='GOOD'  ? 'success' : 'primary'}
-                            size="sm"
-                            onClick={() => answer(k)}
-                            style={{width:'100%'}}
+        <Container fluid className="d-flex flex-column flex-grow-1 p-0">
+            <Row className="justify-content-center flex-grow-1 m-0">
+                <Col md={8} className="d-flex flex-column p-0">
+                    {/* --- Текст карточки --- */}
+                    <div
+                        className="markdown-body border p-3 mb-3 flex-grow-1"
+                        style={{overflow: 'auto'}}        /* прокрутка если текст длинный */
+                        tabIndex={0}
+                        onKeyDown={handleTab}
+                    >
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm, remarkMath]}
+                            rehypePlugins={[rehypeKatex, rehypeHighlight, rehypeRaw]}
                         >
-                            {k}
+                            {displayText}
+                        </ReactMarkdown>
+                    </div>
+
+                    {/* --- Кнопки оценки --- */}
+                    <div className="d-flex justify-content-between mt-auto mb-2 px-3">
+
+                        {['AGAIN', 'HARD', 'GOOD', 'EASY'].map((k) => (
+                            <div key={k} className="text-center flex-fill mx-1">
+                                <small className="text-muted">
+                                    {intervals[k].interval}&nbsp;
+                                    {intervals[k].unit === 'MIN' ? 'мин' : 'дн'}
+                                </small>
+                                <br/>
+                                <Button
+                                    variant={
+                                        k === 'AGAIN' ? 'danger' :
+                                            k === 'HARD' ? 'warning' :
+                                                k === 'GOOD' ? 'success' : 'primary'}
+                                    size="sm"
+                                    onClick={() => answer(k)}
+                                    style={{width: '100%'}}
+                                >
+                                    {k}
+                                </Button>
+                            </div>
+                        ))}
+
+                    </div>
+
+                    <CardCounter total={remaining}/>
+
+                    {/* --- Доп.кнопка «Пропустить» (по желанию) --- */}
+
+                    <div className="text-center mb-3">
+                        <Button variant="outline-secondary" size="sm"
+                                onClick={() => setIdx(i => (i + 1) % cards.length)}>
+                            Пропустить
                         </Button>
                     </div>
-                ))}
 
-            </div>
-
-            {/* --- Доп.кнопка «Пропустить» (по желанию) --- */}
-            <Button
-                variant="outline-secondary"
-                size="sm"
-                onClick={() => setIdx((i) => (i + 1) % cards.length)}
-            >
-                Пропустить
-            </Button>
-
+                </Col>
+            </Row>
         </Container>
     );
 };
