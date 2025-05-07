@@ -105,7 +105,7 @@ const AddCards = () => {
         if (idx === -1) return;
 
         setCardText(
-            cardText.slice(0, idx) + '==' + text + '==' + cardText.slice(idx + text.length)
+            cardText.slice(0, idx) + '??' + text + '??' + cardText.slice(idx + text.length)
         );
         sel?.removeAllRanges();
     }, [annotationMode, cardText]);
