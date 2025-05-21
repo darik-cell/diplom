@@ -194,50 +194,28 @@ autonumber
 skinparam sequenceMessageAlign center
 
 actor  Пользователь as User
-participant "Компонент\nRepeatCards (React)"    as React
-participant "Apollo Client"                     as Apollo
-participant "GraphQL‑endpoint"      as GQL
-participant "CardReviewController"              as Ctrl
-participant "CardReviewService"                 as Service
-participant "DefaultSrsService"                 as Srs
-participant "CardRepository"                    as Repo
-database   "PostgreSQL"                         as DB
+participant "Компонент\nRepeatCards (React)"    as react
+participant "Сервер"              as serv
+database   "PostgreSQL"                         as db
 
 == 1. Старт сессии обучения ==
-User   -> React  : клик «Начать обучение»
-React  -> Apollo : GraphQL query `startLearning`
-Apollo -> GQL    : HTTP POST /graphql
-GQL    -> Ctrl   : startLearning()
-Ctrl   -> Service: startLearning()
-Service-> Srs    : getDueCards()
-Srs    -> Repo   : SELECT карты
-Repo   -> DB     : SQL
-DB     --> Repo
-Repo   --> Srs
-Srs    -> Repo   : UPDATE new→learning
-Repo   -> DB
-Srs    --> Service : список с интервалами
-Service --> Ctrl
-Ctrl   --> GQL
-GQL    --> Apollo
-Apollo --> React  : отрисовать карты
+User   -> react  : клик «Начать обучение»
+react  -> serv : http запрос
+serv    -> db   : SELECT карточки, \nкоторые надо просмотреть
+db     --> serv
+serv -> db : UPDATE новые карточки
+serv    --> react : список с интервалами
+react --> User  : отрисовать карты
 
 == 2. Ответ пользователя на карточку ==
 loop пока есть карточки
-  React  -> Apollo : mutation `reviewCard`
-  Apollo -> GQL    : HTTP POST
-  GQL    -> Ctrl   : reviewCard()
-  Ctrl   -> Service: gradeCard()
-  Service-> Srs    : processReview()
-  Srs    -> Repo   : UPDATE SRS‑полей
-  Repo   -> DB
-  Srs    --> Service
-  Service --> Ctrl
-  Ctrl   --> GQL
-  GQL    --> Apollo
-  Apollo --> React : показать следующую карту
+  User -> react : Оценить карточку
+  react  -> serv : http запрос
+  serv -> serv : выполнить алгоритм \nинтервального повторения
+  serv    -> db   : UPDATE SRS‑полей
+  react --> User : показать следующую карту
 end
 
 == 3. Завершение сессии ==
-React --> User : «Все карточки\nпройдены»
+react --> User : «Все карточки\nпройдены»
 @enduml
