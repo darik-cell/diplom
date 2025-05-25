@@ -79,19 +79,6 @@ endif
 stop
 @enduml
 
-
-@startuml
-title Цикл Active Recall
-
-state Чтение
-state "Активное\nвоспоминание"
-state Повторение
-
-[*] --> Чтение
-Чтение --> "Активное\nвоспоминание"
-"Активное\nвоспоминание" --> Повторение
-Повторение --> Чтение
-@enduml
 @startuml
 title Цикл активное воспоминание
 left to right direction
@@ -104,88 +91,6 @@ state S3 as "Повторение"
 S1 --> S2
 S2 --> S3
 S3 --> S1
-@enduml
-
-@startuml
-!pragma layout smetana
-skinparam componentStyle rectangle
-
-' Внешний клиент
-rectangle "Клиент" as Client
-
-' Фронтенд
-rectangle "Frontend\n(React)" as Frontend {
-  component "Pages\n(React Views)" as Pages
-  component "UI Components\n(Контейнеры)" as UI
-  component "State Management\n(Redux/Context)" as State
-  component "Custom Hooks\n(Переиспольз. логика)" as Hooks
-  component "Routing\n(React Router)" as Routing
-  component "GraphQL Client\n(Apollo Client)" as GQLClient
-}
-
-' Бэкенд
-rectangle "Backend\n(Spring Boot + GraphQL)" as Backend {
-  component "GraphQL Endpoint\n(Spring for GraphQL)" as GQLEndpoint
-  component "Сервисный слой\n(Services)" as Service
-  component "Слой доступа к данным\n(JPA Repositories)" as DAO
-  component "Сервис аутентификации\n(Spring Security + JWT)" as Auth
-}
-
-' База данных
-database "PostgreSQL" as DB
-
-' Связи между основными подсистемами
-Client --> Frontend : "HTTP/HTTPS запросы"
-
-' Внутренние связи фронтенда
-Pages --> UI : "Композиция интерфейса"
-Pages --> State : "Чтение/обновление состояния"
-UI --> State : "Диспетчеризация действий"
-Routing --> Pages : "Маршрутизация"
-Pages --> GQLClient : "Обращение к API"
-Hooks --> Pages : "Переисп. логика"
-
-' Внутренние связи бэкенда
-GQLClient --> GQLEndpoint : "HTTP GraphQL"
-GQLEndpoint --> Service : "Вызов сервисов"
-Service --> DAO : "Работа с репозиториями"
-Auth --> GQLEndpoint : "Проверка токена"
-Auth --> DAO : "Получение учётных данных"
-
-' Связь DAO с БД
-DAO --> DB : "JDBC / Hibernate"
-
-@enduml
-
-@startuml
-!pragma layout smetana
-left to right direction
-actor "Гость" as Guest
-actor "Пользователь" as User
-
-
-(Регистрация) as UC_Register
-(Логин)       as UC_Login
-(Просмотр колод) as UC_ViewColl
-(Создать колоду) as UC_AddColl
-(Удалить колоду) as UC_DelColl
-(Добавить/редактировать карточку) as UC_SaveCard
-(Просмотр/поиск карточек) as UC_EditCards
-(Запуск сессии\nобучения/повторения) as UC_StartLearn
-(Оценить карточку) as UC_Review
-(Видеть счётчики\nпрогресса) as UC_Counters
-
-Guest --> UC_Register
-Guest --> UC_Login
-
-User --> UC_ViewColl
-User --> UC_AddColl
-User --> UC_DelColl
-User --> UC_SaveCard
-User --> UC_EditCards
-User --> UC_StartLearn
-User --> UC_Review
-User --> UC_Counters
 @enduml
 
 @startuml
@@ -218,4 +123,296 @@ end
 
 == 3. Завершение сессии ==
 react --> User : «Все карточки\nпройдены»
+@enduml
+
+'Диаграмма классов
+@startuml
+' Небольшая настройка: убираем иконки у атрибутов
+skinparam classAttributeIconSize 0
+
+' ======= Сущности (Entity) =======
+class User <<entity>> {
+  +id : Integer
+  +email : String
+  +password : String
+}
+
+class Collection <<entity>> {
+  +id : Integer
+  +name : String
+  +createdAt : LocalDateTime
+}
+
+class Card <<entity>> {
+  +id : Integer
+  +text : String
+  +createdAt : LocalDateTime
+  --
+  +type : Integer
+  +queue : Integer
+  +due : Integer
+  +ivl : Integer
+  +factor : Integer
+  +reps : Integer
+  +lapses : Integer
+  +stepsLeft : Integer
+}
+
+' ======= Перечисления (Enum) =======
+enum IntervalUnit {
+  MIN
+  DAY
+}
+
+enum ReviewAnswer {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+}
+
+' ======= Связи =======
+' Пользователь владеет многими коллекциями
+User "1" --> "0..*" Collection : collections
+
+' Коллекция владеет многими карточками
+Collection "1" --> "0..*" Card : cards
+
+' Карточка содержит Map<ReviewAnswer, NextIntervalDto>
+Card .. ReviewAnswer : newIntervals (ключ)
+
+@enduml
+
+@startuml
+' Отключаем иконки видимости у атрибутов
+skinparam classAttributeIconSize 0
+
+' ===================== Классы-сущности =====================
+class Пользователь <<entity>> {
+  id : Integer
+  email : String
+  password : String
+  --
+  установить значение поля(значение) : void
+  получить значение поля() : значение
+}
+
+class Коллекция <<entity>> {
+  id : Integer
+  name : String
+  createdAt : LocalDateTime
+  --
+  установить значение поля(значение) : void
+  получить значение поля() : значение
+}
+
+class Карточка <<entity>> {
+  id : Integer
+  text : String
+  createdAt : LocalDateTime
+  type : Integer
+  queue : Integer
+  due : Integer
+  ivl : Integer
+  factor : Integer
+  reps : Integer
+  lapses : Integer
+  stepsLeft : Integer
+  --
+  установить значение поля(значение) : void
+  получить значение поля() : значение
+}
+
+' ===================== Перечисления =====================
+enum Единица_Интервала {
+  минуты
+  дни
+}
+
+enum Оценка_Повтора {
+  еще раз
+  сложно
+  хорошо
+  легко
+}
+
+' ===================== Связи =====================
+' Агрегация: Пользователь ◇── Коллекция
+Пользователь "1" o-- "0..*" Коллекция
+
+' Композиция: Коллекция ◆── Карточка
+Коллекция "1" *-- "0..*" Карточка
+
+Единица_Интервала --> Карточка
+Оценка_Повтора --> Карточка
+@enduml
+
+@startuml
+skinparam classAttributeIconSize 0
+
+' ===================== Классы-сущности =====================
+class Пользователь {
+  почта: Строка
+  пароль: Строка
+  --
+  установить значение поля(значение) : пусто
+  получить значение поля(): значение
+}
+
+class Коллекция {
+  идентификатор: Целое
+  имя: Строка
+  создано в: Дата и время
+  --
+  установить значение поля(значение): пусто
+  получить значение поля(): значение
+}
+
+class Карточка {
+  текст: Строка
+  создано в: Дата и время
+  тип: Целое
+  очередь: Целое
+  срок: Целое
+  интервал: Целое
+  коэффициент: Целое
+  повторения: Целое
+  срывы: Целое
+  шагов осталось: Целое
+  --
+  установить значение поля(значение): пусто
+  получить значение поля(): значение
+}
+
+' ===================== Перечисления =====================
+enum Единица_Интервала {
+  минуты
+  дни
+}
+
+enum Оценка_Повтора {
+  ещё раз
+  сложно
+  хорошо
+  легко
+}
+
+' ===================== Связи =====================
+Пользователь "1" o-- "0..*" Коллекция
+Коллекция  "1" *-- "0..*" Карточка
+
+Единица_Интервала --> Карточка
+Оценка_Повтора    --> Карточка
+@enduml
+
+@startuml
+left to right direction
+skinparam classAttributeIconSize 0
+'===================== Сущности =====================
+
+class Card <<entity>> {
+  -id: Integer
+  -text: String
+  -createdAt: LocalDateTime
+  -type: Integer
+  -queue: Integer
+  -due: Integer
+  -ivl: Integer
+  -factor: Integer
+  -reps: Integer
+  -lapses: Integer
+  -stepsLeft: Integer
+  -collection: Collection
+  --
+  +getId(): Integer
+  +setId(id: Integer): void
+  +getText(): String
+  +setText(text: String): void
+  +getCreatedAt(): LocalDateTime
+  +setCreatedAt(dt: LocalDateTime): void
+  +getType(): Integer
+  +setType(t: Integer): void
+  +getQueue(): Integer
+  +setQueue(q: Integer): void
+  +getDue(): Integer
+  +setDue(d: Integer): void
+  +getIvl(): Integer
+  +setIvl(i: Integer): void
+  +getFactor(): Integer
+  +setFactor(f: Integer): void
+  +getReps(): Integer
+  +setReps(r: Integer): void
+  +getLapses(): Integer
+  +setLapses(l: Integer): void
+  +getStepsLeft(): Integer
+  +setStepsLeft(s: Integer): void
+  +getCollection(): Collection
+  +setCollection(c: Collection): void
+}
+class User <<entity>> {
+  +id: Integer
+  +email: String
+  +password: String
+  +collections: Set<Collection>
+  --
+  +getId(): Integer
+  +setId(id: Integer): void
+  +getEmail(): String
+  +setEmail(email: String): void
+  +getPassword(): String
+  +setPassword(pwd: String): void
+  +getCollections(): Set<Collection>
+  +setCollections(c: Set<Collection>): void
+}
+
+class Collection <<entity>> {
+  +id: Integer
+  +name: String
+  +createdAt: LocalDateTime
+  +user: User
+  +cards: Set<Card>
+  --
+  +getId(): Integer
+  +setId(id: Integer): void
+  +getName(): String
+  +setName(name: String): void
+  +getCreatedAt(): LocalDateTime
+  +setCreatedAt(dt: LocalDateTime): void
+  +getUser(): User
+  +setUser(u: User): void
+  +getCards(): Set<Card>
+  +setCards(cs: Set<Card>): void
+}
+
+
+'===================== Перечисления =====================
+enum IntervalUnit {
+  MIN
+  DAY
+  --
+  +name(): String
+  +value(): int
+}
+
+enum ReviewAnswer {
+  AGAIN
+  HARD
+  GOOD
+  EASY
+  --
+  +name(): String
+  +value(): int
+}
+
+'===================== Связи =====================
+' Агрегация: User ◇── Collection
+User "1" o-- "0..*" Collection
+
+' Композиция: Collection ◆── Card
+Collection "1" *-- "0..*" Card
+
+' Ассоциации перечислений
+IntervalUnit --> Card
+ReviewAnswer --> Card
+
 @enduml

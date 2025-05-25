@@ -1,5 +1,4 @@
-### apolloClient.js
-```javascript
+apolloClient.js
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
@@ -26,10 +25,8 @@ const client = new ApolloClient({
 });
 
 export default client;
-```
 
-### App.css
-```css
+App.css
 .App {
   text-align: center;
 }
@@ -68,10 +65,8 @@ export default client;
     transform: rotate(360deg);
   }
 }
-```
 
-### App.jsx
-```
+App.jsx
 import React from 'react';
 import {Routes, Route, Navigate, Link, useNavigate} from 'react-router-dom';
 import {Navbar, Container, Nav} from 'react-bootstrap';
@@ -183,10 +178,8 @@ const App = () => {
 
 export default App;
 
-```
 
-### components\AddCards.jsx
-```
+components\AddCards.jsx
 // src/components/AddCards.jsx
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Container, Row, Col, Button, Spinner } from 'react-bootstrap';
@@ -422,10 +415,8 @@ const AddCards = () => {
 };
 
 export default AddCards;
-```
 
-### components\CardCounter.jsx
-```
+components\CardCounter.jsx
 import React from 'react';
 
 const style = {
@@ -445,10 +436,8 @@ export default function CardCounter({ total }) {
         </div>
     );
 }
-```
 
-### components\EditPage.jsx
-```
+components\EditPage.jsx
 import React, { useState, useMemo } from 'react';
 import { Container, Row, Col, Table, Form, Button, Spinner } from 'react-bootstrap';
 import { useQuery, gql } from '@apollo/client';
@@ -738,10 +727,8 @@ const EditPage = () => {
 };
 
 export default EditPage;
-```
 
-### components\Login.jsx
-```
+components\Login.jsx
 import React, { useState } from 'react';
 import { Form, Button, Alert, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -816,10 +803,8 @@ const Login = () => {
 };
 
 export default Login;
-```
 
-### components\Main.jsx
-```
+components\Main.jsx
 // src/components/Main.jsx
 import React, { useState } from 'react';
 import { Container, Button, Form, Spinner, Table } from 'react-bootstrap';
@@ -988,10 +973,8 @@ const Main = () => {
 };
 
 export default Main;
-```
 
-### components\MarkdownHighlight.jsx
-```
+components\MarkdownHighlight.jsx
 import React from 'react';
 import { processMarkedText } from '../utils/highlightLogic'; // путь корректируйте под ваш проект
 
@@ -1011,10 +994,8 @@ function MarkdownHighlight({ children, isClozeView }) {
 }
 
 export default MarkdownHighlight;
-```
 
-### components\Register.jsx
-```
+components\Register.jsx
 import React, { useState } from 'react';
 import { Form, Button, Alert, Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -1107,10 +1088,8 @@ const Register = () => {
 };
 
 export default Register;
-```
 
-### components\RepeatCards.jsx
-```
+components\RepeatCards.jsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import CardCounter from './CardCounter';
 import { Container, Button, Spinner, Row, Col } from 'react-bootstrap';
@@ -1311,10 +1290,8 @@ const RepeatCards = () => {
 };
 
 export default RepeatCards;
-```
 
-### index.css
-```css
+index.css
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -1354,10 +1331,8 @@ code {
     display: block !important;
     margin: 1em 0 !important;
 }
-```
 
-### index.js
-```javascript
+index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -1375,10 +1350,8 @@ root.render(
         </ApolloProvider>
     </BrowserRouter>
 );
-```
 
-### utils\highlightLogic.js
-```javascript
+utils\highlightLogic.js
 /**
  * Функция, которая ищет все вхождения ??...??
  * и заменяет их:
@@ -1408,10 +1381,8 @@ export function processMarkedText(text, isClozeView, hiddenContents = []) {
         }
     });
 }
-```
 
-### main\java\com\myapp\flashcards\config\GraphQLConfig.java
-```java
+main\java\com\myapp\flashcards\config\GraphQLConfig.java
 package com.myapp.flashcards.config;
 
 import com.myapp.flashcards.graphql.scalars.CustomLocalDateTimeCoercing;
@@ -1445,10 +1416,8 @@ public class GraphQLConfig {
     return builder -> builder.scalar(localDateTimeScalar());
   }
 }
-```
 
-### main\java\com\myapp\flashcards\config\SecurityConfig.java
-```java
+main\java\com\myapp\flashcards\config\SecurityConfig.java
 package com.myapp.flashcards.config;
 
 import com.myapp.flashcards.security.JwtAuthenticationFilter;
@@ -1524,10 +1493,8 @@ public class SecurityConfig {
     return authProvider;
   }
 }
-```
 
-### main\java\com\myapp\flashcards\controller\AuthController.java
-```java
+main\java\com\myapp\flashcards\controller\AuthController.java
 package com.myapp.flashcards.controller;
 
 import com.myapp.flashcards.dto.AuthRequest;
@@ -1576,10 +1543,8 @@ public class AuthController {
     return new AuthResponse(token);
   }
 }
-```
 
-### main\java\com\myapp\flashcards\controller\CardController.java
-```java
+main\java\com\myapp\flashcards\controller\CardController.java
 package com.myapp.flashcards.controller;
 
 import com.myapp.flashcards.dto.CardInp;
@@ -1615,10 +1580,8 @@ public class CardController {
             .orElseThrow(() -> new RuntimeException("Card not found"));
   }
 }
-```
 
-### main\java\com\myapp\flashcards\controller\CardReviewController.java
-```java
+main\java\com\myapp\flashcards\controller\CardReviewController.java
 package com.myapp.flashcards.controller;
 
 import com.myapp.flashcards.dto.NextInterval;
@@ -1661,10 +1624,8 @@ public class CardReviewController {
             .toList();
   }
 }
-```
 
-### main\java\com\myapp\flashcards\controller\CollectionController.java
-```java
+main\java\com\myapp\flashcards\controller\CollectionController.java
 package com.myapp.flashcards.controller;
 
 import com.myapp.flashcards.dto.CollectionInp;
@@ -1735,10 +1696,8 @@ public class CollectionController {
     return cardService.countDueReview(collection.getId());
   }
 }
-```
 
-### main\java\com\myapp\flashcards\controller\UserController.java
-```java
+main\java\com\myapp\flashcards\controller\UserController.java
 package com.myapp.flashcards.controller;
 
 import com.myapp.flashcards.dto.UserInp;
@@ -1767,10 +1726,8 @@ public class UserController {
             .orElseThrow(() -> new RuntimeException("User not found"));
   }
 }
-```
 
-### main\java\com\myapp\flashcards\dto\AuthRequest.java
-```java
+main\java\com\myapp\flashcards\dto\AuthRequest.java
 package com.myapp.flashcards.dto;
 
 import lombok.Data;
@@ -1780,10 +1737,8 @@ public class AuthRequest {
   private String email;
   private String password;
 }
-```
 
-### main\java\com\myapp\flashcards\dto\AuthResponse.java
-```java
+main\java\com\myapp\flashcards\dto\AuthResponse.java
 package com.myapp.flashcards.dto;
 
 import lombok.AllArgsConstructor;
@@ -1794,10 +1749,8 @@ import lombok.Data;
 public class AuthResponse {
   private String token;
 }
-```
 
-### main\java\com\myapp\flashcards\dto\CardInp.java
-```java
+main\java\com\myapp\flashcards\dto\CardInp.java
 package com.myapp.flashcards.dto;
 
 import lombok.AllArgsConstructor;
@@ -1817,10 +1770,8 @@ public class CardInp {
   private String text;
   private Integer collectionId;
 }
-```
 
-### main\java\com\myapp\flashcards\dto\CollectionInp.java
-```java
+main\java\com\myapp\flashcards\dto\CollectionInp.java
 package com.myapp.flashcards.dto;
 
 
@@ -1839,10 +1790,8 @@ public class CollectionInp {
   private String name;
   private Set<CardInp> cards;
 }
-```
 
-### main\java\com\myapp\flashcards\dto\NextInterval.java
-```java
+main\java\com\myapp\flashcards\dto\NextInterval.java
 package com.myapp.flashcards.dto;
 
 import com.myapp.flashcards.model.IntervalUnit;
@@ -1857,20 +1806,16 @@ public class NextInterval {
   private Integer interval;
   private IntervalUnit unit;
 }
-```
 
-### main\java\com\myapp\flashcards\dto\NextIntervalDto.java
-```java
+main\java\com\myapp\flashcards\dto\NextIntervalDto.java
 package com.myapp.flashcards.dto;
 
 import com.myapp.flashcards.model.IntervalUnit;
 import com.myapp.flashcards.model.ReviewAnswer;
 
 public record NextIntervalDto(ReviewAnswer answer, int interval, IntervalUnit unit) {}
-```
 
-### main\java\com\myapp\flashcards\dto\RegisterRequest.java
-```java
+main\java\com\myapp\flashcards\dto\RegisterRequest.java
 package com.myapp.flashcards.dto;
 
 import lombok.*;
@@ -1884,10 +1829,8 @@ public class RegisterRequest {
   private String email;
   private String password;
 }
-```
 
-### main\java\com\myapp\flashcards\dto\UserInp.java
-```java
+main\java\com\myapp\flashcards\dto\UserInp.java
 package com.myapp.flashcards.dto;
 
 import lombok.*;
@@ -1905,10 +1848,8 @@ public class UserInp {
   private String password;
   private Set<CollectionInp> collections;
 }
-```
 
-### main\java\com\myapp\flashcards\FlashcardsApplication.java
-```java
+main\java\com\myapp\flashcards\FlashcardsApplication.java
 package com.myapp.flashcards;
 
 import org.springframework.boot.SpringApplication;
@@ -1922,10 +1863,8 @@ public class FlashcardsApplication {
   }
 
 }
-```
 
-### main\java\com\myapp\flashcards\graphql\scalars\CustomLocalDateTimeCoercing.java
-```java
+main\java\com\myapp\flashcards\graphql\scalars\CustomLocalDateTimeCoercing.java
 package com.myapp.flashcards.graphql.scalars;
 
 import graphql.GraphQLContext;
@@ -1990,10 +1929,8 @@ public class CustomLocalDateTimeCoercing implements Coercing<LocalDateTime, Stri
     return StringValue.newStringValue(input.toString()).build();
   }
 }
-```
 
-### main\java\com\myapp\flashcards\mapper\CardMapper.java
-```java
+main\java\com\myapp\flashcards\mapper\CardMapper.java
 package com.myapp.flashcards.mapper;
 
 import com.myapp.flashcards.dto.CardInp;
@@ -2011,10 +1948,8 @@ public interface CardMapper {
   Set<Card> toCardSet(Set<CardInp> cardInpSet);
   Set<CardInp> toCardInpSet(Set<Card> cardSet);
 }
-```
 
-### main\java\com\myapp\flashcards\mapper\CollectionMapper.java
-```java
+main\java\com\myapp\flashcards\mapper\CollectionMapper.java
 package com.myapp.flashcards.mapper;
 
 import com.myapp.flashcards.dto.CollectionInp;
@@ -2032,10 +1967,8 @@ public interface CollectionMapper {
   Set<Collection> toCollectionSet(Set<CollectionInp> collectionInpSet);
   Set<CollectionInp> toCollectionInpSet(Set<Collection> collectionSet);
 }
-```
 
-### main\java\com\myapp\flashcards\mapper\UserMapper.java
-```java
+main\java\com\myapp\flashcards\mapper\UserMapper.java
 package com.myapp.flashcards.mapper;
 
 import com.myapp.flashcards.dto.RegisterRequest;
@@ -2055,10 +1988,8 @@ public interface UserMapper {
   @Mapping(target = "collections", source = "collections")
   UserInp toUserInp(User user);
 }
-```
 
-### main\java\com\myapp\flashcards\model\Card.java
-```java
+main\java\com\myapp\flashcards\model\Card.java
 package com.myapp.flashcards.model;
 
 import com.myapp.flashcards.dto.NextIntervalDto;
@@ -2133,10 +2064,8 @@ public class Card {
     }
   }
 }
-```
 
-### main\java\com\myapp\flashcards\model\Collection.java
-```java
+main\java\com\myapp\flashcards\model\Collection.java
 package com.myapp.flashcards.model;
 
 import jakarta.persistence.*;
@@ -2184,17 +2113,13 @@ public class Collection {
     }
   }
 }
-```
 
-### main\java\com\myapp\flashcards\model\IntervalUnit.java
-```java
+main\java\com\myapp\flashcards\model\IntervalUnit.java
 package com.myapp.flashcards.model;
 
 public enum IntervalUnit { MIN, DAY }
-```
 
-### main\java\com\myapp\flashcards\model\ReviewAnswer.java
-```java
+main\java\com\myapp\flashcards\model\ReviewAnswer.java
 package com.myapp.flashcards.model;
 
 public enum ReviewAnswer {
@@ -2203,10 +2128,8 @@ public enum ReviewAnswer {
   GOOD,    // (prevIvl + delay/2) * ease
   EASY     // (prevIvl + delay) * ease * easyBonus
 }
-```
 
-### main\java\com\myapp\flashcards\model\User.java
-```java
+main\java\com\myapp\flashcards\model\User.java
 package com.myapp.flashcards.model;
 
 import jakarta.persistence.*;
@@ -2236,10 +2159,8 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private Set<Collection> collections;
 }
-```
 
-### main\java\com\myapp\flashcards\repository\CardRepository.java
-```java
+main\java\com\myapp\flashcards\repository\CardRepository.java
 package com.myapp.flashcards.repository;
 
 import org.springframework.data.domain.Sort;
@@ -2274,18 +2195,14 @@ public interface CardRepository extends JpaRepository<Card, Integer> {
   int countDueReview(@Param("cid") Integer collectionId,
                      @Param("today") int todayInDays);
 }
-```
 
-### main\java\com\myapp\flashcards\repository\CardReviewHistoryRepository.java
-```java
+main\java\com\myapp\flashcards\repository\CardReviewHistoryRepository.java
 package com.myapp.flashcards.repository;
 
 public interface CardReviewHistoryRepository {
 }
-```
 
-### main\java\com\myapp\flashcards\repository\CollectionRepository.java
-```java
+main\java\com\myapp\flashcards\repository\CollectionRepository.java
 package com.myapp.flashcards.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -2298,10 +2215,8 @@ import java.util.Set;
 public interface CollectionRepository extends JpaRepository<Collection, Integer> {
   Set<Collection> findAllByUserId(Integer userId);
 }
-```
 
-### main\java\com\myapp\flashcards\repository\UserRepository.java
-```java
+main\java\com\myapp\flashcards\repository\UserRepository.java
 package com.myapp.flashcards.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -2313,10 +2228,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
   Optional<User> findByEmail(String email);
   Boolean existsByEmail(String email);
 }
-```
 
-### main\java\com\myapp\flashcards\security\CustomUserDetails.java
-```java
+main\java\com\myapp\flashcards\security\CustomUserDetails.java
 package com.myapp.flashcards.security;
 
 import com.myapp.flashcards.model.User;
@@ -2372,10 +2285,8 @@ public class CustomUserDetails implements UserDetails {
   }
 
 }
-```
 
-### main\java\com\myapp\flashcards\security\CustomUserDetailsService.java
-```java
+main\java\com\myapp\flashcards\security\CustomUserDetailsService.java
 package com.myapp.flashcards.security;
 
 import com.myapp.flashcards.model.User;
@@ -2399,10 +2310,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     return new CustomUserDetails(user);
   }
 }
-```
 
-### main\java\com\myapp\flashcards\security\JwtAuthenticationFilter.java
-```java
+main\java\com\myapp\flashcards\security\JwtAuthenticationFilter.java
 package com.myapp.flashcards.security;
 
 import jakarta.servlet.FilterChain;
@@ -2455,10 +2364,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     return null;
   }
 }
-```
 
-### main\java\com\myapp\flashcards\security\JwtUtil.java
-```java
+main\java\com\myapp\flashcards\security\JwtUtil.java
 package com.myapp.flashcards.security;
 
 import com.myapp.flashcards.model.User;
@@ -2514,10 +2421,8 @@ public class JwtUtil {
     return false;
   }
 }
-```
 
-### main\java\com\myapp\flashcards\service\CardReviewService.java
-```java
+main\java\com\myapp\flashcards\service\CardReviewService.java
 package com.myapp.flashcards.service;
 
 import com.myapp.flashcards.model.Card;
@@ -2574,10 +2479,8 @@ public class CardReviewService {
     return card;
   }
 }
-```
 
-### main\java\com\myapp\flashcards\service\CardService.java
-```java
+main\java\com\myapp\flashcards\service\CardService.java
 package com.myapp.flashcards.service;
 
 import com.myapp.flashcards.dto.CardInp;
@@ -2660,10 +2563,8 @@ public class CardService {
       return cardRepository.countDueReview(collId, today);
   }
 }
-```
 
-### main\java\com\myapp\flashcards\service\CollectionService.java
-```java
+main\java\com\myapp\flashcards\service\CollectionService.java
 package com.myapp.flashcards.service;
 
 import com.myapp.flashcards.dto.CollectionInp;
@@ -2714,10 +2615,8 @@ public class CollectionService {
   }
 
 }
-```
 
-### main\java\com\myapp\flashcards\service\UserService.java
-```java
+main\java\com\myapp\flashcards\service\UserService.java
 package com.myapp.flashcards.service;
 
 import com.myapp.flashcards.dto.RegisterRequest;
@@ -2768,10 +2667,8 @@ public class UserService {
     return userRepository.findByEmail(email);
   }
 }
-```
 
-### main\java\com\myapp\flashcards\srs\DefaultSrsService.java
-```java
+main\java\com\myapp\flashcards\srs\DefaultSrsService.java
 package com.myapp.flashcards.srs;
 
 import com.myapp.flashcards.dto.NextIntervalDto;
@@ -3054,10 +2951,8 @@ public class DefaultSrsService implements SrsService {
     cards.forEach(c -> c.setNewIntervals(previewIntervals(c)));
   }
 }
-```
 
-### main\java\com\myapp\flashcards\srs\SrsConfig.java
-```java
+main\java\com\myapp\flashcards\srs\SrsConfig.java
 package com.myapp.flashcards.srs;
 
 public class SrsConfig {
@@ -3075,10 +2970,8 @@ public class SrsConfig {
   public static final int EASY_GRADUATING_IVL = 4; // 4 дня, как в Anki
   public static final int[] LEARNING_STEPS_MIN = {1, 10}; // пример: 1 мин и 10 мин
 }
-```
 
-### main\java\com\myapp\flashcards\srs\SrsService.java
-```java
+main\java\com\myapp\flashcards\srs\SrsService.java
 package com.myapp.flashcards.srs;
 
 import com.myapp.flashcards.model.Card;
@@ -3109,10 +3002,8 @@ public interface SrsService {
   List<Card> getDueCards(Integer collectionId, LocalDate today);
 }
 
-```
 
-### main\resources\application.yaml
-```yaml
+main\resources\application.yaml
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${POSTGRES_DATABASE}?currentSchema=${POSTGRES_SCHEMA}
@@ -3140,10 +3031,8 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expirationMs: 86400000
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\01-changeset-users-table.xml
-```xml
+main\resources\db\changelog\v.1.0.0_initial-schema\01-changeset-users-table.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3169,10 +3058,8 @@ jwt:
     </changeSet>
 
 </databaseChangeLog>
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\01-create-users-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\01-create-users-table.sql
 -- Таблица пользователей
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -3180,15 +3067,11 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\01-drop-users-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\01-drop-users-table.sql
 DROP TABLE users;
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\10-changeset-collections-table.xml
-```xml
+main\resources\db\changelog\v.1.0.0_initial-schema\10-changeset-collections-table.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3214,10 +3097,8 @@ DROP TABLE users;
     </changeSet>
 
 </databaseChangeLog>
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\10-create-collections-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\10-create-collections-table.sql
 -- Таблица коллекций
 CREATE TABLE collections (
     id SERIAL PRIMARY KEY,
@@ -3226,15 +3107,11 @@ CREATE TABLE collections (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_collections_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\10-drop-collections-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\10-drop-collections-table.sql
 DROP TABLE collections;
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\20-changeset-cards-table.xml
-```xml
+main\resources\db\changelog\v.1.0.0_initial-schema\20-changeset-cards-table.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3260,10 +3137,8 @@ DROP TABLE collections;
     </changeSet>
 
 </databaseChangeLog>
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\20-create-cards-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\20-create-cards-table.sql
 CREATE TABLE cards
 (
     id            SERIAL PRIMARY KEY,
@@ -3280,15 +3155,11 @@ CREATE TABLE cards
     lapses        INTEGER   NOT NULL DEFAULT 0,
     steps_left    INTEGER   NOT NULL DEFAULT 2     -- default learning steps = 2
 );
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\20-drop-cards-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\20-drop-cards-table.sql
 DROP TABLE cards;
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\30-changeset-repetitions-table.xml
-```xml
+main\resources\db\changelog\v.1.0.0_initial-schema\30-changeset-repetitions-table.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3306,18 +3177,14 @@ DROP TABLE cards;
     </changeSet>
 
 </databaseChangeLog>
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\30-create-repetitions-table.sql
-```sql
+main\resources\db\changelog\v.1.0.0_initial-schema\30-create-repetitions-table.sql
 CREATE TABLE repetitions
 (
 
 );
-```
 
-### main\resources\db\changelog\v.1.0.0_initial-schema\db.changelog-v.1.0.0_initial-schema.xml
-```xml
+main\resources\db\changelog\v.1.0.0_initial-schema\db.changelog-v.1.0.0_initial-schema.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3330,15 +3197,11 @@ CREATE TABLE repetitions
     <include file="20-changeset-cards-table.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
-```
 
-### main\resources\db-init\initdb.sql
-```sql
+main\resources\db-init\initdb.sql
 CREATE SCHEMA IF NOT EXISTS flashcards;
-```
 
-### main\resources\db.changelog-master.xml
-```xml
+main\resources\db.changelog-master.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -3357,10 +3220,8 @@ CREATE SCHEMA IF NOT EXISTS flashcards;
     <include file="/db/changelog/v.1.0.0_initial-schema/db.changelog-v.1.0.0_initial-schema.xml"/>
 
 </databaseChangeLog>
-```
 
-### main\resources\graphql\card-review.graphqls
-```
+main\resources\graphql\card-review.graphqls
 extend type Query {
     startLearning(collectionId: ID!): [Card!]!
 }
@@ -3376,10 +3237,8 @@ enum ReviewAnswer {
     EASY
 }
 
-```
 
-### main\resources\graphql\card.graphqls
-```
+main\resources\graphql\card.graphqls
 scalar LocalDateTime
 
 extend type Query {
@@ -3414,10 +3273,8 @@ type Card {
     stepsLeft: Int!
     newIntervals: [NextInterval!]! # <‑‑ новое поле
 }
-```
 
-### main\resources\graphql\collection.graphqls
-```
+main\resources\graphql\collection.graphqls
 extend type Query {
     collection(id: ID!): Collection
     collectionsByUserId(userId: ID!): [Collection]
@@ -3446,10 +3303,8 @@ type Collection {
     reviewCount: Int       # ← к повторению
 }
 
-```
 
-### main\resources\graphql\nextInterval.graphqls
-```
+main\resources\graphql\nextInterval.graphqls
 enum IntervalUnit { MIN DAY }
 
 type NextInterval {
@@ -3457,10 +3312,8 @@ type NextInterval {
     interval: Int!         # число
     unit: IntervalUnit! # MIN или DAY
 }
-```
 
-### main\resources\graphql\user.graphqls
-```
+main\resources\graphql\user.graphqls
 type Query {
     user(id: ID!): User!
     users: [User]
@@ -3483,7 +3336,4 @@ input UserInp {
     password: String
     collections: [CollectionInp]
 }
-```
 
-# Задание
-- 
