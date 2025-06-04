@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="78c72ebe-07db-49e6-b197-fe7a8b4e2d46" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/markdown.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/flashcards/dgrm.puml" beforeDir="false" afterPath="$PROJECT_DIR$/flashcards/dgrm.puml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Пояснительная_записка_ВКРБ_2024.docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/~$РБ. 6401. Алёнушка А.А..docx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ВКРБ. 6401. Алёнушка А.А..docx" beforeDir="false" afterPath="$PROJECT_DIR$/ВКРБ. 6401. Алёнушка А.А..docx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +29,10 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.FlashcardsApplication.executor": "Run",
@@ -74,7 +71,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1749068003091</updated>
-      <workItem from="1749068004218" duration="5934000" />
+      <workItem from="1749068004218" duration="6114000" />
     </task>
     <servers />
   </component>
