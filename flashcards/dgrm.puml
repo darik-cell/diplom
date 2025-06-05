@@ -10,7 +10,6 @@ skinparam state<<Relearning>> BackgroundColor LightSalmon
 [*] --> New
 
 state New <<New>>
-New : Шаги изучения\n1 м → 10 м → 1 дн…
 
 New --> Learning : показать карту
 

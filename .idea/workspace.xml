@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78c72ebe-07db-49e6-b197-fe7a8b4e2d46" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/~$РБ. 6401. Алёнушка А.А..docx" beforeDir="false" />
+    <list default="true" id="d754edcc-147e-4d44-b2d5-890aeb481d81" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flashcards/dgrm.puml" beforeDir="false" afterPath="$PROJECT_DIR$/flashcards/dgrm.puml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ВКРБ. 6401. Алёнушка А.А..docx" beforeDir="false" afterPath="$PROJECT_DIR$/ВКРБ. 6401. Алёнушка А.А..docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Презентация_Алёнушка_6401 — копия.pptx" beforeDir="false" afterPath="$PROJECT_DIR$/Презентация_Алёнушка_6401 — копия.pptx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,11 +20,15 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="ProjectColorInfo"><![CDATA[{
   "customColor": "",
   "associatedIndex": 0
 }]]></component>
-  <component name="ProjectId" id="2y3f6avKs2KcZ1oqNWwSfQI7ibu" />
+  <component name="ProjectId" id="2y5jtW33gdKLLhL0ZiBybH2R4Mx" />
   <component name="ProjectViewState">
     <option name="autoscrollFromSource" value="true" />
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -29,16 +37,10 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.FlashcardsApplication.executor": "Run",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Alenushka/unik/diplom",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -59,19 +61,19 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.25410.129" />
-        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-IU-251.25410.129" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
       </set>
     </attachedChunks>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="78c72ebe-07db-49e6-b197-fe7a8b4e2d46" name="Changes" comment="" />
-      <created>1749068003091</created>
+      <changelist id="d754edcc-147e-4d44-b2d5-890aeb481d81" name="Changes" comment="" />
+      <created>1749131543538</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1749068003091</updated>
-      <workItem from="1749068004218" duration="6114000" />
+      <updated>1749131543538</updated>
+      <workItem from="1749131545638" duration="2852000" />
     </task>
     <servers />
   </component>
